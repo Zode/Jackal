@@ -38,7 +38,7 @@ public static class Renderer
 			}
 		}
 	}
-	private static VSyncMode _vSync = VSyncMode.Disabled;
+	private static VSyncMode _vSync = VSyncMode.Enabled;
 	/// <summary>
 	/// Rendering framerate cap. Set to 0 to disable.
 	/// </summary>
