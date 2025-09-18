@@ -88,6 +88,14 @@ public class Shader : IDisposable
 	}
 
 	/// <summary>
+	/// Unbind any shader from being currenty active.
+	/// </summary>
+	public static void Unbind()
+	{
+		GL.UseProgram(0);
+	}
+
+	/// <summary>
 	/// Dispose the shader.
 	/// </summary>
 	public void Dispose()
@@ -107,6 +115,7 @@ public class Shader : IDisposable
 			return;
 		}
 
+		Unbind();
 		GL.DeleteProgram(_ID);
 		_disposed = true;
 	}
