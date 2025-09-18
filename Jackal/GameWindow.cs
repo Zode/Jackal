@@ -4,6 +4,10 @@ using SDL;
 using Jackal.Rendering;
 using Jackal.Input;
 
+#if DEBUG
+using System.Diagnostics;
+#endif
+
 namespace Jackal;
 
 /// <summary>
@@ -344,6 +348,11 @@ public unsafe class GameWindow() : IDisposable
 	/// </summary>
 	~GameWindow()
 	{
+		#if DEBUG
+		Console.WriteLine("Leak! Did you forget to call dispose?");
+		Debugger.Launch();
+		#endif
+
 		Dispose(false);
 	}
 }
