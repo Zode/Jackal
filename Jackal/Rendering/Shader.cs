@@ -23,11 +23,23 @@ public class Shader : IDisposable
 	/// <param name="fragmentFilePath">File path to the fragment glsl.</param>
 	/// <returns>The new shader instance.</returns>
 	/// <exception cref="ShaderException"></exception>
-	private static Shader FromGLSLFile(string vertexFilePath, string fragmentFilePath)
+	public static Shader FromGLSLFile(string vertexFilePath, string fragmentFilePath)
 	{
 		string vertexSource = File.ReadAllText(vertexFilePath);
 		string fragmentSource = File.ReadAllText(fragmentFilePath);
 		
+		return FromString(vertexSource, fragmentSource);
+	}
+
+	/// <summary>
+	/// Create a new shader from GLSL source strings.
+	/// </summary>
+	/// <param name="vertexSource">String containing the vertex source.</param>
+	/// <param name="fragmentSource">String containing the fragment source.</param>
+	/// <returns>The new shader instance.</returns>
+	/// <exception cref="ShaderException"></exception>
+	public static Shader FromString(string vertexSource, string fragmentSource)
+	{
 		int vertexID = GL.CreateShader(OpenTK.Graphics.OpenGL4.ShaderType.VertexShader);
 		int fragmentID = GL.CreateShader(OpenTK.Graphics.OpenGL4.ShaderType.FragmentShader);
 		if(vertexID == 0 || fragmentID == 0)
