@@ -118,7 +118,7 @@ public class Shader : IDisposable
 	{
 		#if DEBUG
 		Console.WriteLine("Shader leak! Did you forget to call dispose?");
-		Debugger.Break();
+		Debugger.Launch();
 		#endif
 
 		Dispose(false);
