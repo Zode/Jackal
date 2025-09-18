@@ -10,7 +10,7 @@ namespace Jackal.Rendering;
 
 /// <summary>
 /// </summary>
-public unsafe class VertexBuffer : IDisposable
+public class VertexBuffer : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
@@ -57,7 +57,7 @@ public unsafe class VertexBuffer : IDisposable
 	}
 
 	/// <summary>
-	/// Unbind any vertexbuffer from being active.
+	/// Unbind any vertex buffer from being active.
 	/// </summary>
 	public static void Unbind()
 	{
