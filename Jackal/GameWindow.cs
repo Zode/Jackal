@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using SDL;
 using Jackal.Rendering;
 using Jackal.Input;
+using Jackal.Exceptions;
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -254,18 +256,18 @@ public unsafe class GameWindow() : IDisposable
 		if(!SDL3.SDL_GetClosestFullscreenDisplayMode(SDL3.SDL_GetDisplayForWindow(Window),
 			displayMode.Width, displayMode.Height, displayMode.RefreshRate, true, &closestMode))
 		{
-			throw new Exception("Failed to find suitable fullscreen mode.");
+			throw new GameWindowException("Failed to find suitable fullscreen mode.");
 		}
 
 		if(!SDL3.SDL_SetWindowFullscreenMode(Window, &closestMode))
 		{
 			
-			throw new Exception("Failed to set fullscreen mode.");
+			throw new GameWindowException("Failed to set fullscreen mode.");
 		}
 
 		if(!SDL3.SDL_SetWindowFullscreen(Window, true))
 		{
-			throw new Exception("Failed to go fullscreen.");
+			throw new GameWindowException("Failed to go fullscreen.");
 		}
 
 		SDL3.SDL_SyncWindow(Window);
@@ -282,12 +284,12 @@ public unsafe class GameWindow() : IDisposable
 		SDL_Rect bounds;
 		if(!SDL3.SDL_GetDisplayBounds(display, &bounds))
 		{
-			throw new Exception("Failed to get display bounds.");
+			throw new GameWindowException("Failed to get display bounds.");
 		}
 
 		if(!SDL3.SDL_SetWindowFullscreen(Window, false))
 		{
-			throw new Exception("Failed to go windowed.");
+			throw new GameWindowException("Failed to go windowed.");
 		}
 
 		SDL3.SDL_SetWindowSize(Window, bounds.w, bounds.h);
@@ -305,7 +307,7 @@ public unsafe class GameWindow() : IDisposable
 	{
 		if(!SDL3.SDL_SetWindowFullscreen(Window, false))
 		{
-			throw new Exception("Failed to go windowed.");
+			throw new GameWindowException("Failed to go windowed.");
 		}
 
 		SDL3.SDL_SetWindowSize(Window, WindowSettings.Width, WindowSettings.Height);
