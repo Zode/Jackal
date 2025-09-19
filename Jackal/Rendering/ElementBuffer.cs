@@ -167,6 +167,7 @@ public unsafe class ElementBuffer : IDisposable
 
 		Unbind();
 		GL.DeleteBuffer(_ID);
+		_ID = 0;
 		_disposed = true;
 	}
 

@@ -103,6 +103,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 
 		Unbind();
 		GL.DeleteBuffer(_ID);
+		_ID = 0;
 		_disposed = true;
 	}
 

@@ -75,6 +75,7 @@ public class VertexArray : IDisposable
 
 		Unbind();
 		GL.DeleteVertexArray(_ID);
+		_ID = 0;
 		_disposed = true;
 	}
 

@@ -103,7 +103,7 @@ public class Shader : IDisposable
 		}
 
 		_LastBoundID = _ID;
-		
+
 		GL.UseProgram(_ID);
 	}
 
@@ -137,6 +137,7 @@ public class Shader : IDisposable
 
 		Unbind();
 		GL.DeleteProgram(_ID);
+		_ID = 0;
 		_disposed = true;
 	}
 
