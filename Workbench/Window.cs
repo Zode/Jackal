@@ -2,11 +2,16 @@ using System;
 using Jackal;
 using Jackal.Rendering;
 using Jackal.Input;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Workbench;
 
-public class Window : GameWindow
+public unsafe class Window : GameWindow
 {
+	VertexArray vertArray;
+	VertexBuffer vertBuffer;
+	Shader shader;
+
 	public Window()
 	{
 		WindowSettings = new()
@@ -29,6 +34,47 @@ public class Window : GameWindow
 		SetWindowed();
 		//SetExclusiveFullscreen(DisplayModes[0]);
 		//SetBorderlessFullscreen();
+
+		shader = Shader.FromString("""
+		#version 460 core
+		layout (location = 0) in vec3 Position;
+		
+		void main()
+		{
+			gl_Position = vec4(Position, 1.0f);
+		}
+		""","""
+		#version 460 core
+		out vec4 FragColor;
+
+		void main()
+		{
+			FragColor = vec4(1.0f);
+		}
+		""");
+
+		float[] vertices = {
+			-0.5f, -0.5f, 0.0f,
+			0.5f, -0.5f, 0.0f,
+			0.0f, 0.5f, 0.0f,
+		};
+
+		vertArray = new();
+		fixed(float* verts = vertices)
+		{
+			vertBuffer = new(VertexBufferType.Static, vertices.Length * sizeof(float), (IntPtr)verts);
+		}
+
+		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
+		vertexLayoutBuilder.AddFloat(3).SetLayout();
+	}
+
+	public override bool OnExitRequested()
+	{
+		shader.Dispose();
+		vertArray.Dispose();
+		vertBuffer.Dispose();
+		return true;
 	}
 
 	public override void OnMouseFocusChanged(bool mouseInWindow)
@@ -53,6 +99,10 @@ public class Window : GameWindow
 
 	public override void OnRenderFrame()
 	{
+		shader.Bind();
+		vertArray.Bind();
+		GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+
 		//Console.WriteLine($"Render frame time: {Renderer.FrameTime} ({Renderer.FPS} fps) (vsync: {Renderer.VSync}, framecap: {Renderer.FrameRateCap})");
 	}
 }
