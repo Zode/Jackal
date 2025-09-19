@@ -62,7 +62,7 @@ public unsafe class Window : GameWindow
 		vertArray = new();
 		fixed(float* verts = vertices)
 		{
-			vertBuffer = new(VertexBufferType.Static, vertices.Length * sizeof(float), (IntPtr)verts);
+			vertBuffer = new(BufferType.Static, vertices.Length * sizeof(float), (IntPtr)verts);
 		}
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();

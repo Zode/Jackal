@@ -10,30 +10,29 @@ namespace Jackal.Rendering;
 
 /// <summary>
 /// </summary>
-public class VertexBuffer : IDisposable
+public class ElementBuffer : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
 
 	/// <summary>
-	/// Initializes a new instance of VertexBuffer class.
+	/// Initializes a new instance of ElementBuffer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
-	/// <param name="size">Size of the data (usually <c>data.length * typeof(data)</c>).</param>
-	/// <param name="data">Pointer to data.</param>
-	/// <exception cref="VertexBufferException"></exception>
+	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer" /> indices.</param>
+	/// <exception cref="ElementBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
-	public VertexBuffer(BufferType bufferType, int size, IntPtr data)
+	public ElementBuffer(BufferType bufferType, uint[] indices)
 	{
-		if(data == IntPtr.Zero)
+		if(indices.Length == 0)
 		{
-			throw new VertexBufferException("Data is empty");
+			throw new ElementBufferException("No indices");
 		}
 
 		_ID = GL.GenBuffer();
 		if(_ID == 0)
 		{
-			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+			throw new ElementBufferException("Could not create element buffer object on OpenGL side");
 		}
 
 		Bind();
@@ -45,27 +44,27 @@ public class VertexBuffer : IDisposable
 			_ => throw new NotImplementedException(),
 		};
 
-		GL.BufferData(BufferTarget.ArrayBuffer, size, data, bufferUsageHint);
+		GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length, indices, bufferUsageHint);
 	}
 
 	/// <summary>
-	/// Bind the vertex buffer as currently active.
+	/// Bind the element buffer as currently active.
 	/// </summary>
 	public void Bind()
 	{
-		GL.BindBuffer(BufferTarget.ArrayBuffer, _ID);
+		GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ID);
 	}
 
 	/// <summary>
-	/// Unbind any vertex buffer from being active.
+	/// Unbind any element buffer from being active.
 	/// </summary>
 	public static void Unbind()
 	{
-		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+		GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 	}
 
 	/// <summary>
-	/// Dispose the vertex buffer.
+	/// Dispose the element buffer.
 	/// </summary>
 	public void Dispose()
 	{
@@ -74,7 +73,7 @@ public class VertexBuffer : IDisposable
 	}
 
 	/// <summary>
-	/// Dispose the vertex buffer.
+	/// Dispose the element buffer.
 	/// </summary>
 	/// <param name="disposing"></param>
 	protected virtual void Dispose(bool disposing)
@@ -90,12 +89,12 @@ public class VertexBuffer : IDisposable
 	}
 
 	/// <summary>
-	/// Destructor for VertexBuffer class.
+	/// Destructor for ElementBuffer class.
 	/// </summary>
-	~VertexBuffer()
+	~ElementBuffer()
 	{
 		#if DEBUG
-		Console.WriteLine("VertexBuffer leak! Did you forget to call dispose?");
+		Console.WriteLine("ElementBuffer leak! Did you forget to call dispose?");
 		Debugger.Launch();
 		#endif
 
