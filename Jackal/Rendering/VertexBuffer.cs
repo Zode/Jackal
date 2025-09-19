@@ -17,9 +17,10 @@ public class VertexBuffer<T> : IDisposable where T : struct
 	private int _ID = 0;
 	private static int _LastBoundID = 0;
 	private int _size = 0;
+	private BufferType _bufferType;
 
 	/// <summary>
-	/// Initializes a new instance of VertexBufer class.
+	/// Initializes a new instance of VertexBuffer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
 	/// <param name="vertices">Vertex array.</param>
@@ -32,6 +33,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 			throw new VertexBufferException("No vertices");
 		}
 
+		_bufferType = bufferType;
 		_ID = GL.GenBuffer();
 		if(_ID == 0)
 		{
@@ -47,11 +49,60 @@ public class VertexBuffer<T> : IDisposable where T : struct
 			_ => throw new NotImplementedException(),
 		};
 
-		_size = System.Runtime.InteropServices.Marshal.SizeOf<T>();
+		_size = vertices.Length * System.Runtime.InteropServices.Marshal.SizeOf<T>();
 		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
 		try
 		{
 			GL.BufferData(BufferTarget.ArrayBuffer, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+		}
+		finally
+		{
+			handle.Free();
+		}
+	}
+
+	/// <summary>
+	/// Update the VertexBuffer contents. If buffer type or vertices size differs a new buffer is automatically allocated.
+	/// </summary>
+	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to potentially use.</param>
+	/// <param name="vertices">Vertex array.</param>
+	/// <exception cref="VertexBufferException"></exception>
+	/// <exception cref="NotImplementedException"></exception>
+	public void Update(BufferType bufferType, T[] vertices)
+	{
+		if(vertices.Length == 0)
+		{
+			throw new VertexBufferException("No vertices");
+		}
+		
+		if(_ID == 0)
+		{
+			throw new VertexBufferException("Can't update invalid buffer");
+		}
+
+		BufferUsageHint bufferUsageHint = bufferType switch
+		{
+			BufferType.Static => BufferUsageHint.StaticDraw,
+			BufferType.Dynamic => BufferUsageHint.DynamicDraw,
+			BufferType.Stream => BufferUsageHint.StreamDraw,
+			_ => throw new NotImplementedException(),
+		};
+
+		int newSize = vertices.Length * System.Runtime.InteropServices.Marshal.SizeOf<T>();
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			if(bufferType != _bufferType || newSize != _size)
+			{
+				_bufferType = bufferType;
+				_size = newSize;
+				GL.BufferData(BufferTarget.ArrayBuffer, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+			}
+			else
+			{
+				Bind();
+				GL.BufferSubData(BufferTarget.ArrayBuffer, 0, _size, handle.AddrOfPinnedObject());
+			}
 		}
 		finally
 		{
