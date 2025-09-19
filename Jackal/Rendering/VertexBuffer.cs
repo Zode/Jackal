@@ -85,7 +85,7 @@ public class VertexBuffer : IDisposable
 		}
 
 		Unbind();
-		GL.DeleteProgram(_ID);
+		GL.DeleteBuffer(_ID);
 		_disposed = true;
 	}
 
