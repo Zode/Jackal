@@ -10,6 +10,7 @@ public unsafe class Window : GameWindow
 {
 	VertexArray vertArray;
 	VertexBuffer vertBuffer;
+	ElementBuffer elementBuffer;
 	Shader shader;
 
 	public Window()
@@ -53,17 +54,25 @@ public unsafe class Window : GameWindow
 		}
 		""");
 
-		float[] vertices = {
+		float[] vertices = [
+			-0.5f, 0.5f, 0.0f,
+			0.5f, 0.5f, 0.0f,
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		};
+		];
+
+		uint[] indices = [
+			0, 1, 3,
+			0, 2, 3,
+		];
 
 		vertArray = new();
 		fixed(float* verts = vertices)
 		{
 			vertBuffer = new(BufferType.Static, vertices.Length * sizeof(float), (IntPtr)verts);
 		}
+
+		elementBuffer = new(BufferType.Static, indices);
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
 		vertexLayoutBuilder.AddFloat(3).SetLayout();
@@ -74,6 +83,7 @@ public unsafe class Window : GameWindow
 		shader.Dispose();
 		vertArray.Dispose();
 		vertBuffer.Dispose();
+		elementBuffer.Dispose();
 		return true;
 	}
 
@@ -101,7 +111,18 @@ public unsafe class Window : GameWindow
 	{
 		shader.Bind();
 		vertArray.Bind();
-		GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+		switch(elementBuffer.ElementBufferType)
+		{
+			case ElementBufferType.UnsignedByte:
+				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedByte, 0);
+				break;
+			case ElementBufferType.UnsignedShort:
+				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedShort, 0);
+				break;
+			case ElementBufferType.UnsignedInt:
+				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedInt, 0);
+				break;
+		}
 
 		//Console.WriteLine($"Render frame time: {Renderer.FrameTime} ({Renderer.FPS} fps) (vsync: {Renderer.VSync}, framecap: {Renderer.FrameRateCap})");
 	}
