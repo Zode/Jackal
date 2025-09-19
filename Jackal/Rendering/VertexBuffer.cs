@@ -14,6 +14,7 @@ public class VertexBuffer : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
+	private static int _LastBoundID = 0;
 
 	/// <summary>
 	/// Initializes a new instance of VertexBuffer class.
@@ -53,6 +54,12 @@ public class VertexBuffer : IDisposable
 	/// </summary>
 	public void Bind()
 	{
+		if(_LastBoundID == _ID || _ID == 0)
+		{
+			return;
+		}
+
+		_LastBoundID = _ID;
 		GL.BindBuffer(BufferTarget.ArrayBuffer, _ID);
 	}
 

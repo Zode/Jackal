@@ -15,6 +15,7 @@ public class Shader : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
+	private int _LastBoundID = 0;
 
 	/// <summary>
 	/// Create a new shader from GLSL source files.
@@ -96,6 +97,13 @@ public class Shader : IDisposable
 	/// </summary>
 	public void Bind()
 	{
+		if(_LastBoundID == _ID || _ID == 0)
+		{
+			return;
+		}
+
+		_LastBoundID = _ID;
+		
 		GL.UseProgram(_ID);
 	}
 
