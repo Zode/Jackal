@@ -49,7 +49,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 			_ => throw new NotImplementedException(),
 		};
 
-		_size = vertices.Length * System.Runtime.InteropServices.Marshal.SizeOf<T>();
+		_size = vertices.Length * Marshal.SizeOf<T>();
 		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
 		try
 		{
