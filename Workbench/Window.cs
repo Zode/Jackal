@@ -6,10 +6,23 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Workbench;
 
+struct Vertex(float x, float y, float z)
+{
+	public float X {get;} = x;
+	public float Y {get;} = y;
+	public float Z {get;} = z;
+};
+
+struct Aaaaa
+{
+	int b {get; set;}
+	float c {get; set;}			
+};
+
 public unsafe class Window : GameWindow
 {
 	VertexArray vertArray;
-	VertexBuffer vertBuffer;
+	VertexBuffer<Vertex> vertBuffer;
 	ElementBuffer elementBuffer;
 	Shader shader;
 
@@ -54,11 +67,11 @@ public unsafe class Window : GameWindow
 		}
 		""");
 
-		float[] vertices = [
-			-0.5f, 0.5f, 0.0f,
-			0.5f, 0.5f, 0.0f,
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
+		Vertex[] vertices = [
+			new(-0.5f, 0.5f, 0.0f),
+			new(0.5f, 0.5f, 0.0f),
+			new(-0.5f, -0.5f, 0.0f),
+			new(0.5f, -0.5f, 0.0f),
 		];
 
 		uint[] indices = [
@@ -67,11 +80,7 @@ public unsafe class Window : GameWindow
 		];
 
 		vertArray = new();
-		fixed(float* verts = vertices)
-		{
-			vertBuffer = new(BufferType.Static, vertices.Length * sizeof(float), (IntPtr)verts);
-		}
-
+		vertBuffer = new(BufferType.Static, vertices);
 		elementBuffer = new(BufferType.Static, indices);
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();

@@ -28,7 +28,7 @@ public unsafe class ElementBuffer : IDisposable
 	/// Initializes a new instance of ElementBuffer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
-	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer" /> indices.</param>
+	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer{T}" /> indices.</param>
 	/// <exception cref="ElementBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
 	public ElementBuffer(BufferType bufferType, uint[] indices)
@@ -50,7 +50,7 @@ public unsafe class ElementBuffer : IDisposable
 	/// Initializes a new instance of ElementBuffer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
-	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer" /> indices.</param>
+	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer{T}" /> indices.</param>
 	/// <exception cref="ElementBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
 	public ElementBuffer(BufferType bufferType, ushort[] indices)
@@ -72,7 +72,7 @@ public unsafe class ElementBuffer : IDisposable
 	/// Initializes a new instance of ElementBuffer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
-	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer" /> indices.</param>
+	/// <param name="indices"><see cref="Jackal.Rendering.VertexBuffer{T}" /> indices.</param>
 	/// <exception cref="ElementBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
 	public ElementBuffer(BufferType bufferType, byte[] indices)

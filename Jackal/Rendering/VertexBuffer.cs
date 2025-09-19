@@ -1,6 +1,7 @@
 using System;
 using OpenTK.Graphics.OpenGL4;
 using Jackal.Exceptions;
+using System.Runtime.InteropServices;
 
 #if DEBUG
 using System.Diagnostics;
@@ -10,25 +11,25 @@ namespace Jackal.Rendering;
 
 /// <summary>
 /// </summary>
-public class VertexBuffer : IDisposable
+public class VertexBuffer<T> : IDisposable where T : struct
 {
 	private bool _disposed = false;
 	private int _ID = 0;
 	private static int _LastBoundID = 0;
+	private int _size = 0;
 
 	/// <summary>
-	/// Initializes a new instance of VertexBuffer class.
+	/// Initializes a new instance of VertexBufer class.
 	/// </summary>
 	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
-	/// <param name="size">Size of the data (usually <c>data.length * typeof(data)</c>).</param>
-	/// <param name="data">Pointer to data.</param>
+	/// <param name="vertices">Vertex array.</param>
 	/// <exception cref="VertexBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
-	public VertexBuffer(BufferType bufferType, int size, IntPtr data)
+	public VertexBuffer(BufferType bufferType, T[] vertices)
 	{
-		if(data == IntPtr.Zero)
+		if(vertices.Length == 0)
 		{
-			throw new VertexBufferException("Data is empty");
+			throw new VertexBufferException("No vertices");
 		}
 
 		_ID = GL.GenBuffer();
@@ -46,7 +47,16 @@ public class VertexBuffer : IDisposable
 			_ => throw new NotImplementedException(),
 		};
 
-		GL.BufferData(BufferTarget.ArrayBuffer, size, data, bufferUsageHint);
+		_size = System.Runtime.InteropServices.Marshal.SizeOf<T>();
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			GL.BufferData(BufferTarget.ArrayBuffer, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+		}
+		finally
+		{
+			handle.Free();
+		}
 	}
 
 	/// <summary>
