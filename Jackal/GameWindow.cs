@@ -4,7 +4,7 @@ using SDL;
 using Jackal.Rendering;
 using Jackal.Input;
 using Jackal.Exceptions;
-
+using OpenTK.Graphics.OpenGL4;
 
 #if DEBUG
 using System.Diagnostics;
@@ -68,6 +68,7 @@ public unsafe class GameWindow() : IDisposable
 		}
 
 		SDL3.SDL_GL_MakeCurrent(Window, _glContext);
+		GL.LoadBindings(new SDL3GLBindingsContext());
 		UpdateDisplayModes();
 		Loop();
 	}
