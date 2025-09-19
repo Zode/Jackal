@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Jackal.Exceptions;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+using System.Collections.Generic;
 
 #if DEBUG
 using System.Diagnostics;
@@ -15,7 +17,8 @@ public class Shader : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
-	private int _LastBoundID = 0;
+	private int _lastBoundID = 0;
+	private Dictionary<string, int> _uniformLocations = [];
 
 	/// <summary>
 	/// Create a new shader from GLSL source files.
@@ -93,17 +96,315 @@ public class Shader : IDisposable
 	}
 
 	/// <summary>
+	/// Returns the location of a uniform variable.
+	/// </summary>
+	/// <param name="name">Name of the variable.</param>
+	/// <returns>Location of the uniform variable.</returns>
+	public int GetUniformLocation(string name)
+	{
+		if(_uniformLocations.ContainsKey(name))
+		{
+			return _uniformLocations[name];
+		}
+
+		Bind();
+		int location = GL.GetUniformLocation(_ID, name);
+		_uniformLocations[name] = location;
+		return location;
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform1(int location, bool value)
+	{
+		Bind();
+		GL.Uniform1(location, value ? 1 : 0);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform1(int location, uint value)
+	{
+		Bind();
+		GL.Uniform1(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform1(int location, int value)
+	{
+		Bind();
+		GL.Uniform1(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform1(int location, float value)
+	{
+		Bind();
+		GL.Uniform1(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">First value to set on the uniform.</param>
+	/// <param name="value2">Second value to set on the uniform.</param>
+	public void SetUniform2(int location, uint value, uint value2)
+	{
+		Bind();
+		GL.Uniform2(location, value, value2);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform2(int location, Vector2i value)
+	{
+		Bind();
+		GL.Uniform2(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform2(int location, Vector2 value)
+	{
+		Bind();
+		GL.Uniform2(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform2(int location, Vector2h value)
+	{
+		Bind();
+		GL.Uniform2(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">First value to set on the uniform.</param>
+	/// <param name="value2">Second value to set on the uniform.</param>
+	/// <param name="value3">Third value to set on the uniform.</param>
+	public void SetUniform3(int location, uint value, uint value2, uint value3)
+	{
+		Bind();
+		GL.Uniform3(location, value, value2, value3);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform3(int location, Vector3i value)
+	{
+		Bind();
+		GL.Uniform3(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform3(int location, Vector3 value)
+	{
+		Bind();
+		GL.Uniform3(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform3(int location, Vector3h value)
+	{
+		Bind();
+		GL.Uniform3(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">First value to set on the uniform.</param>
+	/// <param name="value2">Second value to set on the uniform.</param>
+	/// <param name="value3">Third value to set on the uniform.</param>
+	/// <param name="value4">Fourth value to set on the uniform.</param>
+	public void SetUniform4(int location, uint value, uint value2, uint value3, uint value4)
+	{
+		Bind();
+		GL.Uniform4(location, value, value2, value3, value4);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform4(int location, Vector4i value)
+	{
+		Bind();
+		GL.Uniform4(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform4(int location, Vector4 value)
+	{
+		Bind();
+		GL.Uniform4(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniform4(int location, Vector4h value)
+	{
+		Bind();
+		GL.Uniform4(location, value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix2(int location, ref Matrix2 value)
+	{
+		Bind();
+		GL.UniformMatrix2(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix2x3(int location, ref Matrix2x3 value)
+	{
+		Bind();
+		GL.UniformMatrix2x3(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix2x4(int location, ref Matrix2x4 value)
+	{
+		Bind();
+		GL.UniformMatrix2x4(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix3(int location, ref Matrix3 value)
+	{
+		Bind();
+		GL.UniformMatrix3(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix3x2(int location, ref Matrix3x2 value)
+	{
+		Bind();
+		GL.UniformMatrix3x2(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix3x4(int location, ref Matrix3x4 value)
+	{
+		Bind();
+		GL.UniformMatrix3x4(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix4(int location, ref Matrix4 value)
+	{
+		Bind();
+		GL.UniformMatrix4(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix4x2(int location, ref Matrix4x2 value)
+	{
+		Bind();
+		GL.UniformMatrix4x2(location, true, ref value);
+	}
+
+	/// <summary>
+	/// Set the value of a uniform variable.
+	/// </summary>
+	/// <param name="location">Location of the uniform.</param>
+	/// <param name="value">Value to set on the uniform.</param>
+	public void SetUniformMatrix4x3(int location, ref Matrix4x3 value)
+	{
+		Bind();
+		GL.UniformMatrix4x3(location, true, ref value);
+	}
+
+	/// <summary>
 	/// Bind the shader as currently active.
 	/// </summary>
 	public void Bind()
 	{
-		if(_LastBoundID == _ID || _ID == 0)
+		if(_lastBoundID == _ID || _ID == 0)
 		{
 			return;
 		}
 
-		_LastBoundID = _ID;
-
+		_lastBoundID = _ID;
 		GL.UseProgram(_ID);
 	}
 
