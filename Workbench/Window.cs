@@ -3,6 +3,7 @@ using Jackal;
 using Jackal.Rendering;
 using Jackal.Input;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace Workbench;
 
@@ -19,6 +20,7 @@ public unsafe class Window : GameWindow
 	VertexBuffer<Vertex> vertBuffer;
 	ElementBuffer elementBuffer;
 	Shader shader;
+	Vector3 color = Vector3.One;
 
 	public Window()
 	{
@@ -55,9 +57,11 @@ public unsafe class Window : GameWindow
 		#version 460 core
 		out vec4 FragColor;
 
+		uniform vec3 Color;
+
 		void main()
 		{
-			FragColor = vec4(1.0f);
+			FragColor = vec4(Color, 1.0f);
 		}
 		""");
 
@@ -113,6 +117,10 @@ public unsafe class Window : GameWindow
 	public override void OnRenderFrame()
 	{
 		shader.Bind();
+		color.X = MathF.Abs(MathF.Sin(Engine.Time / 1000.0f));
+		color.Y = MathF.Abs(MathF.Sin(Engine.Time / 2222.0f));
+		color.Y = MathF.Abs(MathF.Sin(Engine.Time / 3460.0f));
+		shader.SetUniform3(shader.GetUniformLocation("Color"), color);
 		vertArray.Bind();
 		switch(elementBuffer.ElementBufferType)
 		{
