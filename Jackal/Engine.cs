@@ -42,11 +42,19 @@ public static class Engine
 	/// <summary>
 	/// Time since engine start in milliseconds.
 	/// </summary>
-	public static ulong Time => SDL3.SDL_GetTicks();
+	public static ulong TimeMS => SDL3.SDL_GetTicks();
 	/// <summary>
 	/// Time since engine start in nanoseconds.
 	/// </summary>
 	public static ulong TimeNS => SDL3.SDL_GetTicksNS();
+	/// <summary>
+	/// Time since engine start in seconds.
+	/// </summary>
+	public static double TimeD => TimeMS / 1000.0f; 
+	/// <summary>
+	/// Time since engine start in seconds.
+	/// </summary>
+	public static float TimeF => TimeMS / 1000.0f; 
 	/// <summary>
 	/// Reference to the main game window.
 	/// </summary>
