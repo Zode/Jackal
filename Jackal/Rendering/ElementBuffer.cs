@@ -14,7 +14,7 @@ public unsafe class ElementBuffer : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
-	private static int _LastBoundID = 0;
+	private static int _lastBoundID = 0;
 	/// <summary>
 	/// Type of the indices.
 	/// </summary>
@@ -128,12 +128,12 @@ public unsafe class ElementBuffer : IDisposable
 	/// </summary>
 	public void Bind()
 	{
-		if(_LastBoundID == _ID || _ID == 0)
+		if(_lastBoundID == _ID || _ID == 0)
 		{
 			return;
 		}
 
-		_LastBoundID = _ID;
+		_lastBoundID = _ID;
 		GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ID);
 	}
 
