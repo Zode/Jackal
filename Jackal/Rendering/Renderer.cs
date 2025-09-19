@@ -45,7 +45,7 @@ public unsafe static class Renderer
 	/// </summary>
 	public static uint FrameRateCap {get; set;} = 120;
 	/// <summary>
-	/// The time in ms it took to render the previous render frame.
+	/// The time in milliseconds it took to render the previous render frame.
 	/// </summary>
 	public static float FrameTime {get; private set;} = 0;
 	/// <summary>
