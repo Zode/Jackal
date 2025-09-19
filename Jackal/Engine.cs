@@ -32,13 +32,21 @@ public static class Engine
 	public static float TickDeltaTime {get; private set;} = 1.0f / _ticksPerSecond;
 	private static ulong _tickTimeTarget = TickFrequency / (ulong)_ticksPerSecond;
 	/// <summary>
-	/// The time in ms it took to process the game logic for previous logic tick.
+	/// The time in milliseconds it took to process the game logic for previous logic tick.
 	/// </summary>
 	public static float TickTime {get; private set;} = 0.0f;
 	/// <summary>
 	/// How many game logic ticks were made previously.
 	/// </summary>
 	public static int Ticks {get; private set;} = 0;
+	/// <summary>
+	/// Time since engine start in milliseconds.
+	/// </summary>
+	public static ulong Time => SDL3.SDL_GetTicks();
+	/// <summary>
+	/// Time since engine start in nanoseconds.
+	/// </summary>
+	public static ulong TimeNS => SDL3.SDL_GetTicksNS();
 	/// <summary>
 	/// Reference to the main game window.
 	/// </summary>
