@@ -1,5 +1,6 @@
 using System;
 using SDL;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Jackal.Rendering;
 
@@ -58,6 +59,7 @@ public static class Renderer
 	/// <param name="frameStartTime"></param>
 	internal static void Process(ulong frameStartTime)
 	{
+		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		Engine.GameWindow?.OnRenderFrame();
 		_frameStartTime = frameStartTime;
 	}
@@ -87,7 +89,23 @@ public static class Renderer
 	/// </summary>
 	internal static void Start()
 	{
+		if(Engine.GameWindow is null)
+		{
+			return;
+		}
 
+		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);
+	}
+
+	/// <summary>
+	/// Resize the viewport.
+	/// </summary>
+	/// <param name="width">New width.</param>
+	/// <param name="height">New height.</param>
+	internal static void ResizeViewport(int width, int height)
+	{
+		GL.Viewport(0, 0, width, height);
 	}
 
 	/// <summary>

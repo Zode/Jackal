@@ -95,6 +95,7 @@ public unsafe class GameWindow() : IDisposable
 						break;
 
 					case SDL_EventType.SDL_EVENT_WINDOW_RESIZED:
+						Renderer.ResizeViewport(@event.window.data1, @event.window.data2);
 						OnWindowResized(@event.window.data1, @event.window.data2);
 						break;
 
