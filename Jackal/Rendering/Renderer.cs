@@ -6,7 +6,7 @@ namespace Jackal.Rendering;
 
 /// <summary>
 /// </summary>
-public static class Renderer
+public unsafe static class Renderer
 {
 	/// <summary>
 	/// Should rendering have vsync enabled?
@@ -53,6 +53,7 @@ public static class Renderer
 	/// </summary>
 	public static int FPS => FrameTime > 0.0f ? (int)MathF.Floor(1000.0f / FrameTime) : 0;
 	private static ulong _frameStartTime = 0;
+	internal static int MaxVertexAttributes {get; private set;} = 0;
 
 	/// <summary>
 	/// </summary>
@@ -93,6 +94,10 @@ public static class Renderer
 		{
 			return;
 		}
+
+		int maxVertexAttributes = 0;
+		GL.GetInteger(GetPName.MaxVertexAttribs, &maxVertexAttributes);
+		MaxVertexAttributes = maxVertexAttributes;
 
 		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);

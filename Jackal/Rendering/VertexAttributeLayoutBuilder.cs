@@ -176,6 +176,7 @@ public class VertexAttributeLayoutBuilder
 	/// </summary>
 	public void SetLayout()
 	{
+		int attribCount = 0;
 		int offset = 0;
 		for(int i = 0; i < _layout.Count; i++)
 		{
@@ -183,6 +184,12 @@ public class VertexAttributeLayoutBuilder
 			GL.EnableVertexAttribArray(i);
 			GL.VertexAttribPointer(i, attribute.Count, VertexAttributeLayout.ToGLType(attribute.Type), attribute.Normalized, _layout.Stride, offset);
 			offset += attribute.Count * VertexAttributeLayout.SizeOfType(attribute.Type);
+			
+			attribCount += attribute.Count;
+			if(attribCount > Renderer.MaxVertexAttributes)
+			{
+				throw new VertexAttributeLayoutException($"Reached limit of maximum vertex attributes ({Renderer.MaxVertexAttributes})");
+			}
 		}
 	}
 }

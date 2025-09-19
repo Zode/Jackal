@@ -13,12 +13,6 @@ struct Vertex(float x, float y, float z)
 	public float Z {get;} = z;
 };
 
-struct Aaaaa
-{
-	int b {get; set;}
-	float c {get; set;}			
-};
-
 public unsafe class Window : GameWindow
 {
 	VertexArray vertArray;
