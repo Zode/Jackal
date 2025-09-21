@@ -1,6 +1,7 @@
 using System;
 using SDL;
 using OpenTK.Graphics.OpenGL4;
+using Jackal.FileFormats;
 
 namespace Jackal.Rendering;
 
@@ -54,7 +55,31 @@ public unsafe static class Renderer
 	public static int FPS => FrameTime > 0.0f ? (int)MathF.Floor(1000.0f / FrameTime) : 0;
 	private static ulong _frameStartTime = 0;
 	internal static int MaxVertexAttributes {get; private set;} = 0;
-
+	/// <summary>
+	/// Maximum allowed texture anisotropy level for the OpenGL driver.
+	/// </summary>
+	public static TextureAnisotropy MaximumTextureAnisotropy {get; private set;} = TextureAnisotropy.Zero;
+	/// <summary>
+	/// The global texture anisotropy.
+	/// </summary>
+	public static TextureAnisotropy TextureAnisotropy {get; set;} = TextureAnisotropy.Sixteen;
+	/// <summary>
+	/// The global texture filter.
+	/// </summary>
+	public static TextureFilter TextureFilter {get; set;} = TextureFilter.LinearMipLinear;
+	/// <summary>
+	/// Maximum allowed texture size for the OpenGL driver.
+	/// </summary>
+	public static int MaxTextureSize {get; private set;} = 0;
+	/// <summary>
+	/// Maximum allowed 3d texture size for the OpenGL driver.
+	/// </summary>
+	public static int Max3DTextureSize {get; private set;} = 0;
+	/// <summary>
+	/// Maximum allowed cubemap texture size for the OpenGL driver.
+	/// </summary>
+	public static int MaxCubemapTextureSize {get; private set;} = 0;
+	
 	/// <summary>
 	/// </summary>
 	/// <param name="frameStartTime"></param>
@@ -95,12 +120,37 @@ public unsafe static class Renderer
 			return;
 		}
 
-		int maxVertexAttributes = 0;
-		GL.GetInteger(GetPName.MaxVertexAttribs, &maxVertexAttributes);
-		MaxVertexAttributes = maxVertexAttributes;
+		Texture.AddTextureLoader(".png", typeof(STBTextureLoader));
+		Texture.AddTextureLoader(".tga", typeof(STBTextureLoader));
+		Texture.AddTextureLoader(".bmp", typeof(STBTextureLoader));
+		Texture.AddTextureLoader(".jpg", typeof(STBTextureLoader));
+		Texture.AddTextureLoader(".jpeg", typeof(STBTextureLoader));
+
+		int glint = 0;
+		GL.GetInteger(GetPName.MaxVertexAttribs, &glint);
+		MaxVertexAttributes = glint;
+
+		float maxAnisotropy = 0;
+		GL.GetFloat(GetPName.MaxTextureMaxAnisotropy, &maxAnisotropy);
+		MaximumTextureAnisotropy = TextureAnisotropy.FromFloat(maxAnisotropy);
+
+		GL.GetInteger(GetPName.MaxTextureSize, &glint);
+		MaxTextureSize = glint;
+		GL.GetInteger(GetPName.Max3DTextureSize, &glint);
+		Max3DTextureSize = glint;
+		GL.GetInteger(GetPName.MaxCubeMapTextureSize, &glint);
+		MaxCubemapTextureSize = glint;
 
 		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);
+	}
+
+	/// <summary>
+	/// Called when the engine is starting, after any game code.
+	/// </summary>
+	internal static void PostStart()
+	{
+		TextureAnisotropy = TextureAnisotropy.Clamp(MaximumTextureAnisotropy);
 	}
 
 	/// <summary>

@@ -78,6 +78,7 @@ public unsafe class GameWindow() : IDisposable
 		Engine.Start();
 		_running = true;
 		OnStart();
+		Engine.PostStart();
 
 		while(!_exitRequested)
 		{

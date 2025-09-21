@@ -85,11 +85,19 @@ public static class Engine
 	}
 
 	/// <summary>
-	/// Called when the engine is starting.
+	/// Called when the engine is starting, before any game code.
 	/// </summary>
 	internal static void Start()
 	{
 		Renderer.Start();
+	}
+
+	/// <summary>
+	/// Called when the engine is starting, after any game code.
+	/// </summary>
+	internal static void PostStart()
+	{
+		Renderer.PostStart();
 	}
 
 	/// <summary>

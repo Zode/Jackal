@@ -7,11 +7,13 @@ using OpenTK.Mathematics;
 
 namespace Workbench;
 
-struct Vertex(float x, float y, float z)
+struct Vertex(float x, float y, float z, float u, float v)
 {
 	public float X {get;} = x;
 	public float Y {get;} = y;
 	public float Z {get;} = z;
+	public float U {get;} = u;
+	public float V {get;} = v;
 };
 
 public unsafe class Window : GameWindow
@@ -19,6 +21,7 @@ public unsafe class Window : GameWindow
 	VertexArray vertArray;
 	VertexBuffer<Vertex> vertBuffer;
 	ElementBuffer elementBuffer;
+	Texture texture;
 	Shader shader;
 	Vector3 color = Vector3.One;
 
@@ -45,31 +48,40 @@ public unsafe class Window : GameWindow
 		//SetExclusiveFullscreen(DisplayModes[0]);
 		//SetBorderlessFullscreen();
 
+		Renderer.TextureFilter = TextureFilter.LinearMipLinear;
+		Renderer.TextureAnisotropy = TextureAnisotropy.Sixteen;
+
 		shader = Shader.FromString("""
 		#version 460 core
-		layout (location = 0) in vec3 Position;
+		layout (location = 0) in vec3 aPosition;
+		layout (location = 1) in vec2 aTexCoord;
+
+		out vec2 TexCoord;
 		
 		void main()
 		{
-			gl_Position = vec4(Position, 1.0f);
+			TexCoord = aTexCoord;
+			gl_Position = vec4(aPosition, 1.0f);
 		}
 		""","""
 		#version 460 core
 		out vec4 FragColor;
 
-		uniform vec3 Color;
+		in vec2 TexCoord;
+
+		uniform sampler2D texture0;
 
 		void main()
 		{
-			FragColor = vec4(Color, 1.0f);
+			FragColor = texture(texture0, TexCoord);
 		}
 		""");
 
 		Vertex[] vertices = [
-			new(-0.5f, 0.5f, 0.0f),
-			new(0.5f, 0.5f, 0.0f),
-			new(-0.5f, -0.5f, 0.0f),
-			new(0.5f, -0.5f, 0.0f),
+			new(-0.5f, 0.5f, 0.0f, 0.0f, 1.0f),
+			new(0.5f, 0.5f, 0.0f, 1.0f, 1.0f),
+			new(-0.5f, -0.5f, 0.0f, 0.0f, 0.0f),
+			new(0.5f, -0.5f, 0.0f, 1.0f, 0.0f),
 		];
 
 		uint[] indices = [
@@ -77,16 +89,25 @@ public unsafe class Window : GameWindow
 			0, 2, 3,
 		];
 
+		texture = Texture.FromFile("/home/zode/temp/test.png", new(){
+			TextureType = TextureType.TwoDimensional,
+			TextureWrap = TextureWrap.Repeat,
+			TextureFilterOverride = TextureFilter.None,
+			TextureAnisotropyOverride = TextureAnisotropy.None,
+			Mipmaps = true,
+		});
+
 		vertArray = new();
 		vertBuffer = new(BufferType.Static, vertices);
 		elementBuffer = new(BufferType.Static, indices);
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
-		vertexLayoutBuilder.AddFloat(3).SetLayout();
+		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout();
 	}
 
 	public override bool OnExitRequested()
 	{
+		texture.Dispose();
 		shader.Dispose();
 		vertArray.Dispose();
 		vertBuffer.Dispose();
@@ -116,6 +137,7 @@ public unsafe class Window : GameWindow
 
 	public override void OnRenderFrame()
 	{
+		texture.Bind();
 		shader.Bind();
 		color.X = MathF.Abs(MathF.Sin(Engine.TimeF));
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 1.22f));
