@@ -4,7 +4,7 @@ namespace Jackal.Input;
 
 /// <summary>
 /// </summary>
-public enum KeyboardKey
+public enum KeyboardKey : byte
 {
 	#pragma warning disable CS1591
 	[KeyString("UNK")] Unknown = SDL_Scancode.SDL_SCANCODE_UNKNOWN,

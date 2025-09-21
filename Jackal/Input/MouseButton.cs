@@ -2,7 +2,7 @@ namespace Jackal.Input;
 
 /// <summary>
 /// </summary>
-public enum MouseButton
+public enum MouseButton : byte
 {
 	#pragma warning disable CS1591
 	[KeyString("Left Mouse")] Left,

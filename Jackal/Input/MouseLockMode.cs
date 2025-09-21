@@ -2,7 +2,7 @@ namespace Jackal.Input;
 
 /// <summary>
 /// </summary>
-public enum MouseLockMode
+public enum MouseLockMode : byte
 {
 	/// <summary>
 	/// Mouse cursor is free.
