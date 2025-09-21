@@ -105,7 +105,7 @@ public unsafe class ElementBuffer : IDisposable
 			throw new ElementBufferException("Indices is null");
 		}
 
-		_ID = GL.GenBuffer();
+		GL.GenBuffers(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new ElementBufferException("Could not create element buffer object on OpenGL side");
@@ -121,6 +121,15 @@ public unsafe class ElementBuffer : IDisposable
 		};
 
 		GL.BufferData(BufferTarget.ElementArrayBuffer, size, indices, bufferUsageHint);
+	}
+
+	/// <summary>
+	/// Draw the element buffer.
+	/// </summary>
+	/// <param name="primitiveType">Primitive type to draw the buffer as.</param>
+	public void Draw(PrimitiveType primitiveType)
+	{
+		GL.DrawElements(primitiveType.ToGL(), Count, ElementBufferType.ToGL(), 0);
 	}
 
 	/// <summary>
@@ -166,7 +175,7 @@ public unsafe class ElementBuffer : IDisposable
 		}
 
 		Unbind();
-		GL.DeleteBuffer(_ID);
+		GL.DeleteBuffers(1, ref _ID);
 		_ID = 0;
 		_disposed = true;
 	}

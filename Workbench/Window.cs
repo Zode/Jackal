@@ -144,18 +144,7 @@ public unsafe class Window : GameWindow
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 3.460f));
 		shader.SetUniform3(shader.GetUniformLocation("Color"), color);
 		vertArray.Bind();
-		switch(elementBuffer.ElementBufferType)
-		{
-			case ElementBufferType.UnsignedByte:
-				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedByte, 0);
-				break;
-			case ElementBufferType.UnsignedShort:
-				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedShort, 0);
-				break;
-			case ElementBufferType.UnsignedInt:
-				GL.DrawElements(PrimitiveType.Triangles, elementBuffer.Count, DrawElementsType.UnsignedInt, 0);
-				break;
-		}
+		elementBuffer.Draw(Jackal.Rendering.PrimitiveType.Triangles);
 
 		//Console.WriteLine($"Render frame time: {Renderer.FrameTime} ({Renderer.FPS} fps) (vsync: {Renderer.VSync}, framecap: {Renderer.FrameRateCap})");
 	}
