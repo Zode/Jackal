@@ -34,7 +34,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 		}
 
 		_bufferType = bufferType;
-		_ID = GL.GenBuffer();
+		GL.GenBuffers(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
@@ -153,7 +153,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 		}
 
 		Unbind();
-		GL.DeleteBuffer(_ID);
+		GL.DeleteBuffers(1, ref _ID);
 		_ID = 0;
 		_disposed = true;
 	}

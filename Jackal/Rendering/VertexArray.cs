@@ -22,7 +22,7 @@ public class VertexArray : IDisposable
 	/// <exception cref="VertexArrayException"></exception>
 	public VertexArray()
 	{
-		_ID = GL.GenVertexArray();
+		GL.GenVertexArrays(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new VertexArrayException("Could not create vertex array object on OpenGL side");
@@ -74,7 +74,7 @@ public class VertexArray : IDisposable
 		}
 
 		Unbind();
-		GL.DeleteVertexArray(_ID);
+		GL.DeleteVertexArrays(1, ref _ID);
 		_ID = 0;
 		_disposed = true;
 	}

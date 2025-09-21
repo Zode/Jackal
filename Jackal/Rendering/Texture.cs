@@ -253,7 +253,7 @@ public class Texture : IDisposable
 
 	private void SetupGLTexture()
 	{
-		_ID = GL.GenTexture();
+		GL.GenTextures(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new TextureException("Could not create texture object on OpenGL side");
@@ -389,7 +389,7 @@ public class Texture : IDisposable
 		}
 
 		Unbind();
-		GL.DeleteTexture(_ID);
+		GL.DeleteTextures(1, ref _ID);
 		_ID = 0;
 		_disposed = true;
 	}
