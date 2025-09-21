@@ -18,7 +18,7 @@ public class Texture : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
-	private int _lastBoundID = 0;
+	private static int _lastBoundID = 0;
 	/// <summary>
 	/// Type of the texture.
 	/// </summary>

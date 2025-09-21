@@ -14,7 +14,7 @@ public class VertexArray : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
-	private int _lastBoundID = 0;
+	private static int _lastBoundID = 0;
 
 	/// <summary>
 	/// Initializes a new instance of VertexArray class.

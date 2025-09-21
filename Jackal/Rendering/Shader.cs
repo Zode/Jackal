@@ -17,7 +17,7 @@ public class Shader : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
-	private int _lastBoundID = 0;
+	private static int _lastBoundID = 0;
 	private Dictionary<string, int> _uniformLocations = [];
 
 	/// <summary>
