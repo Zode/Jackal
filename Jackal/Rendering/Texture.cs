@@ -270,7 +270,7 @@ public unsafe class Texture : IDisposable
 		switch(textureSettings.TextureType)
 		{
 			case TextureType.OneDimensional:
-				GL.TexStorage1D(TextureTarget1d.Texture1D, 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)), sizedFormat, textureSize.X);
+				GL.TexStorage1D(TextureTarget1d.Texture1D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X);
 				if(use16bit)
 				{
 					GL.TexSubImage1D(TextureTarget.Texture1D, 0, 0, textureSize.X, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
@@ -283,7 +283,7 @@ public unsafe class Texture : IDisposable
 				break;
 
 			case TextureType.TwoDimensional:
-				GL.TexStorage2D(TextureTarget2d.Texture2D, 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))), sizedFormat, textureSize.X, textureSize.Y);
+				GL.TexStorage2D(TextureTarget2d.Texture2D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				if(use16bit)
 				{
 					GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
@@ -296,7 +296,7 @@ public unsafe class Texture : IDisposable
 				break;
 
 			case TextureType.OneDimensionalArray:
-				GL.TexStorage2D(TextureTarget2d.Texture1DArray, 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)), sizedFormat, textureSize.X, textureSize.Y);
+				GL.TexStorage2D(TextureTarget2d.Texture1DArray, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				if(use16bit)
 				{
 					GL.TexSubImage2D(TextureTarget.Texture1DArray, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
@@ -390,15 +390,15 @@ public unsafe class Texture : IDisposable
 		switch(textureSettings.TextureType)
 		{
 			case TextureType.TwoDimensionalArray:
-				GL.TexStorage3D(TextureTarget3d.Texture2DArray, 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))), sizedFormat, textureSize.X, textureSize.Y, depth);
+				GL.TexStorage3D(TextureTarget3d.Texture2DArray, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
 				break;
 
 			case TextureType.ThreeDimensional:
-				GL.TexStorage3D(TextureTarget3d.Texture3D, 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(MathF.Max(textureSize.X, textureSize.Y), depth))), sizedFormat, textureSize.X, textureSize.Y, depth);
+				GL.TexStorage3D(TextureTarget3d.Texture3D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(MathF.Max(textureSize.X, textureSize.Y), depth))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
 				break;
 
 			case TextureType.CubeMap:
-				GL.TexStorage2D(TextureTarget2d.TextureCubeMap, 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))), sizedFormat, textureSize.X, textureSize.Y);
+				GL.TexStorage2D(TextureTarget2d.TextureCubeMap, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				break;
 		}
 	}
