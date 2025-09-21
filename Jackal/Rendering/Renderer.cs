@@ -79,6 +79,10 @@ public unsafe static class Renderer
 	/// Maximum allowed cubemap texture size for the OpenGL driver.
 	/// </summary>
 	public static int MaxCubemapTextureSize {get; private set;} = 0;
+	/// <summary>
+	/// Maximum allowed array levels in the OpenGL driver.
+	/// </summary>
+	public static int MaxArrayTextureLevels {get; private set;} = 0;
 	
 	/// <summary>
 	/// </summary>
@@ -140,6 +144,8 @@ public unsafe static class Renderer
 		Max3DTextureSize = glint;
 		GL.GetInteger(GetPName.MaxCubeMapTextureSize, &glint);
 		MaxCubemapTextureSize = glint;
+		GL.GetInteger(GetPName.MaxArrayTextureLayers, &glint);
+		MaxArrayTextureLevels = glint;
 
 		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);
