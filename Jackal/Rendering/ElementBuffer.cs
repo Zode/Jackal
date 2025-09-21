@@ -40,9 +40,9 @@ public unsafe class ElementBuffer : IDisposable
 
 		ElementBufferType = ElementBufferType.UnsignedInt;
 		Count = indices.Length;
-		fixed(uint* pIndices = indices)
+		fixed(uint* indicesPtr = indices)
 		{
-			Initialize(bufferType, indices.Length * sizeof(uint), (IntPtr)pIndices);
+			Initialize(bufferType, indices.Length * sizeof(uint), (IntPtr)indicesPtr);
 		}
 	}
 
@@ -62,9 +62,9 @@ public unsafe class ElementBuffer : IDisposable
 
 		ElementBufferType = ElementBufferType.UnsignedShort;
 		Count = indices.Length;
-		fixed(ushort* pIndices = indices)
+		fixed(ushort* indicesPtr = indices)
 		{
-			Initialize(bufferType, indices.Length * sizeof(ushort), (IntPtr)pIndices);
+			Initialize(bufferType, indices.Length * sizeof(ushort), (IntPtr)indicesPtr);
 		}
 	}
 
@@ -84,9 +84,9 @@ public unsafe class ElementBuffer : IDisposable
 
 		ElementBufferType = ElementBufferType.UnsignedByte;
 		Count = indices.Length;
-		fixed(byte* pIndices = indices)
+		fixed(byte* indicesPtr = indices)
 		{
-			Initialize(bufferType, indices.Length * sizeof(byte), (IntPtr)pIndices);
+			Initialize(bufferType, indices.Length * sizeof(byte), (IntPtr)indicesPtr);
 		}
 	}
 	
