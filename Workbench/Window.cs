@@ -100,7 +100,7 @@ public class Window : GameWindow
 		vertArray = new();
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
-		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout(vertArray, vertBuffer);
+		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayoutAndAttach(vertArray, vertBuffer);
 	}
 
 	public override bool OnExitRequested()
