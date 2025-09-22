@@ -174,15 +174,17 @@ public class VertexAttributeLayoutBuilder
 	/// <summary>
 	/// Set the layout to the currently active vertex array.
 	/// </summary>
-	public void SetLayout()
+	public void SetLayout<T>(VertexArray vertexArray, VertexBuffer<T> vertexBuffer, ElementBuffer elementBuffer) where T : struct
 	{
+		vertexArray.Attach(vertexBuffer, elementBuffer, _layout.Stride);
 		int attribCount = 0;
 		int offset = 0;
 		for(int i = 0; i < _layout.Count; i++)
 		{
 			VertexAttributeElement attribute = _layout[i];
-			GL.EnableVertexAttribArray(i);
-			GL.VertexAttribPointer(i, attribute.Count, VertexAttributeLayout.ToGLType(attribute.Type), attribute.Normalized, _layout.Stride, offset);
+			GL.EnableVertexArrayAttrib(vertexArray.ID, i);
+			GL.VertexArrayAttribFormat(vertexArray.ID, i, attribute.Count, VertexAttributeLayout.ToGLType(attribute.Type), attribute.Normalized, offset);
+			GL.VertexArrayAttribBinding(vertexArray.ID, i, 0);
 			offset += attribute.Count * VertexAttributeLayout.SizeOfType(attribute.Type);
 			
 			attribCount += attribute.Count;

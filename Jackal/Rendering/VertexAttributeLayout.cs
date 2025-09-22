@@ -80,19 +80,19 @@ internal class VertexAttributeLayout
 		};
 	}
 
-	public static VertexAttribPointerType ToGLType(VertexAttributeType attributeType)
+	public static VertexAttribType ToGLType(VertexAttributeType attributeType)
 	{
 		return attributeType switch
 		{
-			VertexAttributeType.Byte => VertexAttribPointerType.Byte,
-			VertexAttributeType.UnsignedByte => VertexAttribPointerType.UnsignedByte,
-			VertexAttributeType.Short => VertexAttribPointerType.Short,
-			VertexAttributeType.UnsignedShort => VertexAttribPointerType.UnsignedShort,
-			VertexAttributeType.Int => VertexAttribPointerType.Int,
-			VertexAttributeType.UnsignedInt => VertexAttribPointerType.UnsignedInt,
-			VertexAttributeType.HalfFloat => VertexAttribPointerType.HalfFloat,
-			VertexAttributeType.Float => VertexAttribPointerType.Float,
-			VertexAttributeType.Double => VertexAttribPointerType.Double,
+			VertexAttributeType.Byte => VertexAttribType.Byte,
+			VertexAttributeType.UnsignedByte => VertexAttribType.UnsignedByte,
+			VertexAttributeType.Short => VertexAttribType.Short,
+			VertexAttributeType.UnsignedShort => VertexAttribType.UnsignedShort,
+			VertexAttributeType.Int => VertexAttribType.Int,
+			VertexAttributeType.UnsignedInt => VertexAttribType.UnsignedInt,
+			VertexAttributeType.HalfFloat => VertexAttribType.HalfFloat,
+			VertexAttributeType.Float => VertexAttribType.Float,
+			VertexAttributeType.Double => VertexAttribType.Double,
 			_ => throw new NotImplementedException(),
 		};
 	}

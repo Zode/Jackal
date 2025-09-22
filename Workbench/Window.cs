@@ -97,12 +97,12 @@ public unsafe class Window : GameWindow
 			Mipmaps = true,
 		});
 
-		vertArray = new();
 		vertBuffer = new(BufferType.Static, vertices);
 		elementBuffer = new(BufferType.Static, indices);
+		vertArray = new();
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
-		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout();
+		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout(vertArray, vertBuffer, elementBuffer);
 	}
 
 	public override bool OnExitRequested()

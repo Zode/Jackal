@@ -15,6 +15,10 @@ public class VertexBuffer<T> : IDisposable where T : struct
 {
 	private bool _disposed = false;
 	private int _ID = 0;
+	/// <summary>
+	/// OpenGL ID.
+	/// </summary>
+	public int ID => _ID;
 	private static int _lastBoundID = 0;
 	private int _size = 0;
 	private BufferType _bufferType;
@@ -34,13 +38,12 @@ public class VertexBuffer<T> : IDisposable where T : struct
 		}
 
 		_bufferType = bufferType;
-		GL.GenBuffers(1, out _ID);
+		GL.CreateBuffers(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
 		}
 
-		Bind();
 		BufferUsageHint bufferUsageHint = bufferType switch
 		{
 			BufferType.Static => BufferUsageHint.StaticDraw,
@@ -53,7 +56,7 @@ public class VertexBuffer<T> : IDisposable where T : struct
 		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
 		try
 		{
-			GL.BufferData(BufferTarget.ArrayBuffer, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+			GL.NamedBufferData(_ID, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
 		}
 		finally
 		{
@@ -96,12 +99,11 @@ public class VertexBuffer<T> : IDisposable where T : struct
 			{
 				_bufferType = bufferType;
 				_size = newSize;
-				GL.BufferData(BufferTarget.ArrayBuffer, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+				GL.NamedBufferData(_ID, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
 			}
 			else
 			{
-				Bind();
-				GL.BufferSubData(BufferTarget.ArrayBuffer, 0, _size, handle.AddrOfPinnedObject());
+				GL.NamedBufferSubData(_ID, 0, _size, handle.AddrOfPinnedObject());
 			}
 		}
 		finally

@@ -14,6 +14,10 @@ public class VertexArray : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
+	/// <summary>
+	/// OpenGL ID.
+	/// </summary>
+	public int ID => _ID;
 	private static int _lastBoundID = 0;
 
 	/// <summary>
@@ -22,13 +26,45 @@ public class VertexArray : IDisposable
 	/// <exception cref="VertexArrayException"></exception>
 	public VertexArray()
 	{
-		GL.GenVertexArrays(1, out _ID);
+		GL.CreateVertexArrays(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new VertexArrayException("Could not create vertex array object on OpenGL side");
 		}
+	}
 
-		Bind();
+	/// <summary>
+	/// Attach a vertex buffer and element buffer.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="vertexBuffer"></param>
+	/// <param name="elementBuffer"></param>
+	/// <param name="stride"></param>
+	/// <exception cref="VertexArrayException"></exception>
+	public void Attach<T>(VertexBuffer<T> vertexBuffer, ElementBuffer elementBuffer, int stride) where T : struct
+	{
+		if(_ID == 0)
+		{
+			throw new VertexArrayException("Tried to attach vertex buffer and element buffer to non-existent vertex array");
+		}
+
+		if(vertexBuffer.ID == 0)
+		{
+			throw new VertexArrayException("Tried to attach non-existent vertex buffer to vertex array");
+		}
+
+		if(elementBuffer.ID == 0)
+		{
+			throw new VertexArrayException("Tried to attach non-existent element buffer to vertex array");
+		}
+
+		if(stride == 0)
+		{
+			throw new VertexArrayException("Stride can't be zero");
+		}
+
+		GL.VertexArrayVertexBuffer(_ID, 0, vertexBuffer.ID, 0, stride);
+		GL.VertexArrayElementBuffer(_ID, elementBuffer.ID);
 	}
 
 	/// <summary>

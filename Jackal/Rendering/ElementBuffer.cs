@@ -14,6 +14,10 @@ public unsafe class ElementBuffer : IDisposable
 {
 	private bool _disposed = false;
 	private int _ID = 0;
+	/// <summary>
+	/// OpenGL ID.
+	/// </summary>
+	public int ID => _ID;
 	private static int _lastBoundID = 0;
 	/// <summary>
 	/// Type of the indices.
@@ -105,13 +109,12 @@ public unsafe class ElementBuffer : IDisposable
 			throw new ElementBufferException("Indices is null");
 		}
 
-		GL.GenBuffers(1, out _ID);
+		GL.CreateBuffers(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new ElementBufferException("Could not create element buffer object on OpenGL side");
 		}
 
-		Bind();
 		BufferUsageHint bufferUsageHint = bufferType switch
 		{
 			BufferType.Static => BufferUsageHint.StaticDraw,
@@ -120,7 +123,7 @@ public unsafe class ElementBuffer : IDisposable
 			_ => throw new NotImplementedException(),
 		};
 
-		GL.BufferData(BufferTarget.ElementArrayBuffer, size, indices, bufferUsageHint);
+		GL.NamedBufferData(_ID, size, indices, bufferUsageHint);
 	}
 
 	/// <summary>
