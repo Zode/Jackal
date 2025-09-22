@@ -87,6 +87,10 @@ public unsafe static class Renderer
 	/// Maximum allowed array levels in the OpenGL driver.
 	/// </summary>
 	public static int MaxArrayTextureLevels {get; private set;} = 0;
+	/// <summary>
+	/// Uniform buffer offset alignment (GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT)
+	/// </summary>
+	public static int UniformBufferOffsetAlignment {get; private set;} = 0;
 	
 	/// <summary>
 	/// </summary>
@@ -156,6 +160,9 @@ public unsafe static class Renderer
 		MaxCubemapTextureSize = glint;
 		GL.GetInteger(GetPName.MaxArrayTextureLayers, &glint);
 		MaxArrayTextureLevels = glint;
+
+		GL.GetInteger(GetPName.UniformBufferOffsetAlignment, &glint);
+		UniformBufferOffsetAlignment = glint;
 
 		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);

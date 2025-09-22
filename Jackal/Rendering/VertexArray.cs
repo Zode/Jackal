@@ -19,6 +19,7 @@ public class VertexArray : IDisposable
 	/// </summary>
 	public int ID => _ID;
 	private static int _lastBoundID = 0;
+	private VertexBaseBuffer? _vertexBaseBuffer = null;
 
 	/// <summary>
 	/// Initializes a new instance of VertexArray class.
@@ -38,10 +39,9 @@ public class VertexArray : IDisposable
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <param name="vertexBuffer"></param>
-	/// <param name="elementBuffer"></param>
 	/// <param name="stride"></param>
 	/// <exception cref="VertexArrayException"></exception>
-	public void Attach<T>(VertexBuffer<T> vertexBuffer, ElementBuffer elementBuffer, int stride) where T : struct
+	public void Attach<T>(VertexBuffer<T> vertexBuffer, int stride) where T : struct
 	{
 		if(_ID == 0)
 		{
@@ -53,20 +53,30 @@ public class VertexArray : IDisposable
 			throw new VertexArrayException("Tried to attach non-existent vertex buffer to vertex array");
 		}
 
-		if(elementBuffer.ID == 0)
-		{
-			throw new VertexArrayException("Tried to attach non-existent element buffer to vertex array");
-		}
-
 		if(stride == 0)
 		{
 			throw new VertexArrayException("Stride can't be zero");
 		}
 
 		GL.VertexArrayVertexBuffer(_ID, 0, vertexBuffer.ID, 0, stride);
-		GL.VertexArrayElementBuffer(_ID, elementBuffer.ID);
+		GL.VertexArrayElementBuffer(_ID, vertexBuffer.ID);
+		_vertexBaseBuffer = vertexBuffer;
 	}
 
+	/// <summary>
+	/// Draw the vertex buffer.
+	/// </summary>
+	/// <param name="primitiveType">Primitive type to draw the buffer as.</param>
+	public void Draw(PrimitiveType primitiveType)
+	{
+		if(_ID == 0)
+		{
+			return;
+		}
+
+		_vertexBaseBuffer?.Draw(primitiveType);
+	}
+	
 	/// <summary>
 	/// Bind the vertex array as currently active.
 	/// </summary>
@@ -112,6 +122,7 @@ public class VertexArray : IDisposable
 		Unbind();
 		GL.DeleteVertexArrays(1, ref _ID);
 		_ID = 0;
+		_vertexBaseBuffer = null;
 		_disposed = true;
 	}
 

@@ -174,9 +174,9 @@ public class VertexAttributeLayoutBuilder
 	/// <summary>
 	/// Set the layout to the currently active vertex array.
 	/// </summary>
-	public void SetLayout<T>(VertexArray vertexArray, VertexBuffer<T> vertexBuffer, ElementBuffer elementBuffer) where T : struct
+	public void SetLayout<T>(VertexArray vertexArray, VertexBuffer<T> vertexBuffer) where T : struct
 	{
-		vertexArray.Attach(vertexBuffer, elementBuffer, _layout.Stride);
+		vertexArray.Attach(vertexBuffer, _layout.Stride);
 		int attribCount = 0;
 		int offset = 0;
 		for(int i = 0; i < _layout.Count; i++)

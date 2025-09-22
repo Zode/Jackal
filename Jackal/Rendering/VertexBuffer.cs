@@ -11,71 +11,105 @@ namespace Jackal.Rendering;
 
 /// <summary>
 /// </summary>
-public class VertexBuffer<T> : IDisposable where T : struct
+public class VertexBuffer<T> : VertexBaseBuffer, IDisposable where T : struct
 {
 	private bool _disposed = false;
-	private int _ID = 0;
 	/// <summary>
 	/// OpenGL ID.
 	/// </summary>
 	public int ID => _ID;
 	private static int _lastBoundID = 0;
 	private int _size = 0;
-	private BufferType _bufferType;
 
 	/// <summary>
 	/// Initializes a new instance of VertexBuffer class.
 	/// </summary>
-	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to use.</param>
 	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
 	/// <exception cref="VertexBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
-	public VertexBuffer(BufferType bufferType, T[] vertices)
+	public VertexBuffer(T[] vertices, uint[] indices)
 	{
 		if(vertices.Length == 0)
 		{
 			throw new VertexBufferException("No vertices");
 		}
 
-		_bufferType = bufferType;
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
+		}
+
 		GL.CreateBuffers(1, out _ID);
 		if(_ID == 0)
 		{
 			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
 		}
 
-		BufferUsageHint bufferUsageHint = bufferType switch
-		{
-			BufferType.Static => BufferUsageHint.StaticDraw,
-			BufferType.Dynamic => BufferUsageHint.DynamicDraw,
-			BufferType.Stream => BufferUsageHint.StreamDraw,
-			_ => throw new NotImplementedException(),
-		};
+		_elementBufferType = ElementBufferType.UnsignedInt;
+		_indicesCount = indices.Length;
 
-		_size = vertices.Length * Marshal.SizeOf<T>();
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(uint));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(uint);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+		_indicesOffset = verticesAligned;
+
+		_size = verticesAligned + indicesAligned;
+		GL.NamedBufferStorage(_ID, _size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
 		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
 		try
 		{
-			GL.NamedBufferData(_ID, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
 		}
 		finally
 		{
 			handle.Free();
 		}
 	}
+	
+	/// <summary>
+	/// Align operand to closest next alignment.
+	/// </summary>
+	/// <param name="operand">Value to align.</param>
+	/// <param name="alignment">Alignment.</param>
+	/// <returns>Aligned value.</returns>
+	private static int Align(int operand, int alignment)
+	{
+		return (operand + (alignment - 1)) & ~(alignment - 1);
+	}
 
 	/// <summary>
 	/// Update the VertexBuffer contents. If buffer type or vertices size differs a new buffer is automatically allocated.
 	/// </summary>
-	/// <param name="bufferType"><see cref="Jackal.Rendering.BufferType" /> to potentially use.</param>
 	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
 	/// <exception cref="VertexBufferException"></exception>
 	/// <exception cref="NotImplementedException"></exception>
-	public void Update(BufferType bufferType, T[] vertices)
+	public void Update(T[] vertices, uint[] indices)
 	{
 		if(vertices.Length == 0)
 		{
 			throw new VertexBufferException("No vertices");
+		}
+
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
 		}
 		
 		if(_ID == 0)
@@ -83,28 +117,54 @@ public class VertexBuffer<T> : IDisposable where T : struct
 			throw new VertexBufferException("Can't update invalid buffer");
 		}
 
-		BufferUsageHint bufferUsageHint = bufferType switch
+		if(_elementBufferType != ElementBufferType.UnsignedInt)
 		{
-			BufferType.Static => BufferUsageHint.StaticDraw,
-			BufferType.Dynamic => BufferUsageHint.DynamicDraw,
-			BufferType.Stream => BufferUsageHint.StreamDraw,
-			_ => throw new NotImplementedException(),
-		};
+			throw new VertexBufferException($"Buffer type mismatch, element was unsigned int buffer had {_elementBufferType}");
+		}
 
-		int newSize = vertices.Length * System.Runtime.InteropServices.Marshal.SizeOf<T>();
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(uint));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(uint);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+
+		int size = verticesAligned + indicesAligned;
+
+		if(size != _size)
+		{
+			Unbind();
+			GL.DeleteBuffers(1, ref _ID);
+			_ID = 0;
+			GL.CreateBuffers(1, out _ID);
+			if(_ID == 0)
+			{
+				throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+			}
+
+			GL.NamedBufferStorage(_ID, size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
+		}
+
+		_size = size;
+		_indicesCount = indices.Length;
+		_indicesOffset = verticesAligned;
+
 		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
 		try
 		{
-			if(bufferType != _bufferType || newSize != _size)
-			{
-				_bufferType = bufferType;
-				_size = newSize;
-				GL.NamedBufferData(_ID, _size, handle.AddrOfPinnedObject(), bufferUsageHint);
-			}
-			else
-			{
-				GL.NamedBufferSubData(_ID, 0, _size, handle.AddrOfPinnedObject());
-			}
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
 		}
 		finally
 		{

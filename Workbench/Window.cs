@@ -20,7 +20,6 @@ public class Window : GameWindow
 {
 	VertexArray vertArray;
 	VertexBuffer<Vertex> vertBuffer;
-	ElementBuffer elementBuffer;
 	Texture texture;
 	Shader shader;
 	Vector3 color = Vector3.One;
@@ -89,7 +88,7 @@ public class Window : GameWindow
 			0, 2, 3,
 		];
 
-		texture = Texture.FromFile("/home/zode/temp/doesnotexist.png", new(){
+		texture = Texture.FromFile("/home/zode/temp/test.png", new(){
 			TextureType = TextureType.TwoDimensional,
 			TextureWrap = TextureWrap.Repeat,
 			TextureFilterOverride = TextureFilter.None,
@@ -97,12 +96,11 @@ public class Window : GameWindow
 			Mipmaps = true,
 		});
 
-		vertBuffer = new(BufferType.Static, vertices);
-		elementBuffer = new(BufferType.Static, indices);
+		vertBuffer = new(vertices, indices);
 		vertArray = new();
 
 		VertexAttributeLayoutBuilder vertexLayoutBuilder = new();
-		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout(vertArray, vertBuffer, elementBuffer);
+		vertexLayoutBuilder.AddFloat(3).AddFloat(2).SetLayout(vertArray, vertBuffer);
 	}
 
 	public override bool OnExitRequested()
@@ -116,7 +114,6 @@ public class Window : GameWindow
 		shader.Dispose();
 		vertArray.Dispose();
 		vertBuffer.Dispose();
-		elementBuffer.Dispose();
 	}
 
 	public override void OnMouseFocusChanged(bool mouseInWindow)
@@ -148,7 +145,7 @@ public class Window : GameWindow
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 3.460f));
 		shader.SetUniform3(shader.GetUniformLocation("Color"), color);
 		vertArray.Bind();
-		elementBuffer.Draw(Jackal.Rendering.PrimitiveType.Triangles);
+		vertArray.Draw(Jackal.Rendering.PrimitiveType.Triangles);
 
 		//Console.WriteLine($"Render frame time: {Renderer.FrameTime} ({Renderer.FPS} fps) (vsync: {Renderer.VSync}, framecap: {Renderer.FrameRateCap})");
 	}
