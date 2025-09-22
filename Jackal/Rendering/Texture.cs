@@ -88,7 +88,7 @@ public unsafe class Texture : IDisposable
 	{
 		if(!File.Exists(filePath))
 		{
-			throw new TextureException($"Filepath \"{filePath}\" does not exist or is a directory.");
+			return FromDefault(textureSettings.TextureType);
 		}
 
 		string fileExtension = Path.GetExtension(filePath);
@@ -136,7 +136,7 @@ public unsafe class Texture : IDisposable
 		{
 			if(!File.Exists(filePath))
 			{
-				throw new TextureException($"Filepath \"{filePath}\" does not exist or is a directory.");
+				return FromDefault(textureSettings.TextureType, filePath.Length);
 			}
 
 			fileExtension = Path.GetExtension(filePath);
@@ -334,7 +334,7 @@ public unsafe class Texture : IDisposable
 	{
 		bool use16bit = false;
 		PixelType pixelType = PixelType.UnsignedByte;
-		switch(Type.GetTypeCode(data.GetType()))
+		switch(Type.GetTypeCode(typeof(T)))
 		{
 			case TypeCode.Byte:
 				break;
@@ -380,6 +380,107 @@ public unsafe class Texture : IDisposable
 		if(textureSettings.Mipmaps)
 		{
 			texture.SetupMipmaps(textureSettings.TextureType);
+		}
+
+		return texture;
+	}
+
+	private static Texture FromDefault(TextureType type)
+	{
+		byte[] texture;
+		Vector2i size;
+		if(type == TextureType.OneDimensional)
+		{
+			size = new(32, 1);
+			texture = GenerateDefaultTexture(32, 1);
+		}
+		else
+		{
+			size = new(32, 32);
+			texture = GenerateDefaultTexture(32, 32);
+		}
+
+		return FromData(texture,size, TextureFormat.RGBA, new()
+		{
+			TextureType = type,
+			TextureWrap = TextureWrap.Repeat,
+			TextureFilterOverride = TextureFilter.NearestMipNearest,
+			TextureAnisotropyOverride = TextureAnisotropy.None,
+			Mipmaps = true,
+		});
+	}
+
+	private static Texture FromDefault(TextureType type, int count)
+	{
+		byte[,] texture = new byte[count, 32 * 32 * 4];
+		for(int i = 0; i < count; i++)
+		{
+			byte[] jorge = GenerateDefaultTexture(32, 32);
+			for(int j = 0; j < jorge.Length; j++)
+			{
+				texture[i, j] = jorge[j];
+			}
+		}
+
+		return FromData(texture, new Vector2i(32, 32), TextureFormat.RGBA, new()
+		{
+			TextureType = type,
+			TextureWrap = TextureWrap.Repeat,
+			TextureFilterOverride = TextureFilter.NearestMipNearest,
+			TextureAnisotropyOverride = TextureAnisotropy.None,
+			Mipmaps = true,
+		});
+	}
+
+	private static byte[] GenerateDefaultTexture(int width, int height)
+	{
+		byte[] texture = new byte[width * height * 4];
+		for(int y = 0; y < height; y++)
+		{
+			for(int x = 0; x < width; x++)
+			{	
+				bool triangleMask = false;
+				if(x / 2 < y && y <= height / 2)
+				{
+					triangleMask = true;
+				}
+				else if(x / 2 < height - y && y >= height / 2)
+				{
+					triangleMask = true;
+				}
+
+				bool grid = true;
+				if(x % (width / 4) < width / 8)
+				{
+					grid = false;
+					if(y % (height / 4) < height / 8)
+					{
+						grid = true;
+					}
+				}
+				else
+				{
+					if(y % (height / 4) < height / 8)
+					{
+						grid = false;
+					}
+				}
+
+				if(triangleMask)
+				{
+					texture[(y * width * 4) + (x * 4) + 0] = (byte)(grid ? 179 : 0);
+					texture[(y * width * 4) + (x * 4) + 1] = 64;
+					texture[(y * width * 4) + (x * 4) + 2] = (byte)(grid ? 64 : 192);
+					texture[(y * width * 4) + (x * 4) + 3] = 255;
+				}
+				else
+				{
+					texture[(y * width * 4) + (x * 4) + 0] = (byte)(grid ? 232 : 41);
+					texture[(y * width * 4) + (x * 4) + 1] = (byte)(grid ? 186 : 166);
+					texture[(y * width * 4) + (x * 4) + 2] = (byte)(grid ? 186 : 115);
+					texture[(y * width * 4) + (x * 4) + 3] = 255;
+				}
+			} 
 		}
 
 		return texture;

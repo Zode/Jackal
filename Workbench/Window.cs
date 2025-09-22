@@ -69,11 +69,11 @@ public unsafe class Window : GameWindow
 
 		in vec2 TexCoord;
 
-		uniform sampler2D texture0;
+		uniform sampler3D texture0;
 
 		void main()
 		{
-			FragColor = texture(texture0, TexCoord);
+			FragColor = texture(texture0, vec3(TexCoord.x, TexCoord.y, 0.0f));
 		}
 		""");
 
@@ -89,8 +89,8 @@ public unsafe class Window : GameWindow
 			0, 2, 3,
 		];
 
-		texture = Texture.FromFile("/home/zode/temp/test.png", new(){
-			TextureType = TextureType.TwoDimensional,
+		texture = Texture.FromFiles(["/home/zode/temp/test2.png", "/home/zode/temp/test2.png", "/home/zode/temp/test2.png"], new(){
+			TextureType = TextureType.ThreeDimensional,
 			TextureWrap = TextureWrap.Repeat,
 			TextureFilterOverride = TextureFilter.None,
 			TextureAnisotropyOverride = TextureAnisotropy.None,
