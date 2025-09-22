@@ -29,6 +29,11 @@ public class Shader : IDisposable
 	/// <exception cref="ShaderException"></exception>
 	public static Shader FromGLSLFile(string vertexFilePath, string fragmentFilePath)
 	{
+		if(!File.Exists(vertexFilePath) || !File.Exists(fragmentFilePath))
+		{
+			return FromDefault();
+		}
+
 		string vertexSource = File.ReadAllText(vertexFilePath);
 		string fragmentSource = File.ReadAllText(fragmentFilePath);
 		
@@ -93,6 +98,27 @@ public class Shader : IDisposable
 		{
 			_ID = programID,
 		};
+	}
+
+	private static Shader FromDefault()
+	{
+		return FromString("""
+		#version 460 core
+		layout (location = 0) in vec3 aPosition;
+		
+		void main()
+		{
+			gl_Position = vec4(aPosition, 1.0f);
+		}
+		""","""
+		#version 460 core
+		out vec4 FragColor;
+
+		void main()
+		{
+			FragColor = vec4(1, 0, 1, 1);
+		}
+		""");
 	}
 
 	/// <summary>
