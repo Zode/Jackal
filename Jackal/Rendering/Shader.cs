@@ -29,9 +29,27 @@ public class Shader : IDisposable
 	/// <exception cref="ShaderException"></exception>
 	public static Shader FromGLSLFile(string vertexFilePath, string fragmentFilePath)
 	{
-		if(!File.Exists(vertexFilePath) || !File.Exists(fragmentFilePath))
+		try
 		{
+			return InternalFromGLSLFile(vertexFilePath, fragmentFilePath);
+		}
+		catch(Exception e)
+		{
+			Console.WriteLine(e.Message);
 			return FromDefault();
+		}
+	}
+
+	private static Shader InternalFromGLSLFile(string vertexFilePath, string fragmentFilePath)
+	{
+		if(!File.Exists(vertexFilePath))
+		{
+			throw new ShaderException($"Filepath \"{vertexFilePath}\" for vertex shader does not exist or is a directory");
+		}
+
+		if(!File.Exists(fragmentFilePath))
+		{
+			throw new ShaderException($"Filepath \"{fragmentFilePath}\" for fragment shader does not exist or is a directory");
 		}
 
 		string vertexSource = File.ReadAllText(vertexFilePath);
@@ -49,6 +67,29 @@ public class Shader : IDisposable
 	/// <exception cref="ShaderException"></exception>
 	public static Shader FromString(string vertexSource, string fragmentSource)
 	{
+		try
+		{
+			return InternalFromString(vertexSource, fragmentSource);
+		}
+		catch(Exception e)
+		{
+			Console.WriteLine(e.Message);
+			return FromDefault();
+		}
+	}
+
+	private static Shader InternalFromString(string vertexSource, string fragmentSource)
+	{
+		if(string.IsNullOrWhiteSpace(vertexSource))
+		{
+			throw new ShaderException("Vertex source is null or whitespace");
+		}
+
+		if(string.IsNullOrWhiteSpace(fragmentSource))
+		{
+			throw new ShaderException("Fragment source is null or whitespace");
+		}
+
 		int vertexID = GL.CreateShader(OpenTK.Graphics.OpenGL4.ShaderType.VertexShader);
 		int fragmentID = GL.CreateShader(OpenTK.Graphics.OpenGL4.ShaderType.FragmentShader);
 		if(vertexID == 0 || fragmentID == 0)

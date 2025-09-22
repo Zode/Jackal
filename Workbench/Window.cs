@@ -16,7 +16,7 @@ struct Vertex(float x, float y, float z, float u, float v)
 	public float V {get;} = v;
 };
 
-public unsafe class Window : GameWindow
+public class Window : GameWindow
 {
 	VertexArray vertArray;
 	VertexBuffer<Vertex> vertBuffer;
@@ -69,11 +69,11 @@ public unsafe class Window : GameWindow
 
 		in vec2 TexCoord;
 
-		uniform sampler3D texture0;
+		uniform sampler2D texture0;
 
 		void main()
 		{
-			FragColor = texture(texture0, vec3(TexCoord.x, TexCoord.y, 0.0f));
+			FragColor = texture(texture0, TexCoord);
 		}
 		""");
 
@@ -89,8 +89,8 @@ public unsafe class Window : GameWindow
 			0, 2, 3,
 		];
 
-		texture = Texture.FromFiles(["/home/zode/temp/test2.png", "/home/zode/temp/test2.png", "/home/zode/temp/test2.png"], new(){
-			TextureType = TextureType.ThreeDimensional,
+		texture = Texture.FromFile("/home/zode/temp/doesnotexist.png", new(){
+			TextureType = TextureType.TwoDimensional,
 			TextureWrap = TextureWrap.Repeat,
 			TextureFilterOverride = TextureFilter.None,
 			TextureAnisotropyOverride = TextureAnisotropy.None,

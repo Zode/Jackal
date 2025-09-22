@@ -86,9 +86,22 @@ public unsafe class Texture : IDisposable
 	/// <exception cref="TextureException"></exception>
 	public static Texture FromFile(string filePath, TextureSettings textureSettings)
 	{
+		try
+		{
+			return InternalFromFile(filePath, textureSettings);
+		}
+		catch(Exception e)
+		{
+			Console.WriteLine(e.Message);
+			return FromDefault(textureSettings.TextureType);
+		}
+	}
+
+	private static Texture InternalFromFile(string filePath, TextureSettings textureSettings)
+	{
 		if(!File.Exists(filePath))
 		{
-			return FromDefault(textureSettings.TextureType);
+			throw new TextureException($"Filepath \"{filePath}\" does not exist or is a directory.");
 		}
 
 		string fileExtension = Path.GetExtension(filePath);
@@ -126,6 +139,19 @@ public unsafe class Texture : IDisposable
 	/// <exception cref="TextureException"></exception>
 	public static Texture FromFiles(string[] filePaths, TextureSettings textureSettings)
 	{
+		try
+		{
+			return InternalFromFiles(filePaths, textureSettings);
+		}
+		catch(Exception e)
+		{
+			Console.WriteLine(e.Message);
+			return FromDefault(textureSettings.TextureType, Math.Max(filePaths.Length, 1));
+		}
+	}
+
+	private static Texture InternalFromFiles(string[] filePaths, TextureSettings textureSettings)
+	{
 		if(filePaths.Length == 0)
 		{
 			throw new TextureException($"No files");
@@ -136,7 +162,7 @@ public unsafe class Texture : IDisposable
 		{
 			if(!File.Exists(filePath))
 			{
-				return FromDefault(textureSettings.TextureType, filePath.Length);
+				throw new TextureException($"Filepath \"{filePath}\" does not exist or is a directory.");
 			}
 
 			fileExtension = Path.GetExtension(filePath);
