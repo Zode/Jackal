@@ -188,7 +188,7 @@ public class VertexAttributeLayoutBuilder
 			offset += attribute.Count * VertexAttributeLayout.SizeOfType(attribute.Type);
 			
 			attribCount += attribute.Count;
-			if(attribCount > Renderer.MaxVertexAttributes)
+			if(attribCount >= Renderer.MaxVertexAttributes)
 			{
 				throw new VertexAttributeLayoutException($"Reached limit of maximum vertex attributes ({Renderer.MaxVertexAttributes})");
 			}
