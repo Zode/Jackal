@@ -49,6 +49,11 @@ public unsafe class GameWindow() : IDisposable
 		SDL3.SDL_GL_SetAttribute(SDL_GLAttr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL_GLProfile.SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL3.SDL_GL_SetAttribute(SDL_GLAttr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		SDL3.SDL_GL_SetAttribute(SDL_GLAttr.SDL_GL_CONTEXT_MINOR_VERSION, 6);
+		#if DEBUG
+		int contextFlags = 0;
+		SDL3.SDL_GL_GetAttribute(SDL_GLAttr.SDL_GL_CONTEXT_FLAGS, &contextFlags);
+		SDL3.SDL_GL_SetAttribute(SDL_GLAttr.SDL_GL_CONTEXT_FLAGS, contextFlags | (int)SDL_GLContextFlag.SDL_GL_CONTEXT_DEBUG_FLAG);
+		#endif
 
 		Window = SDL3.SDL_CreateWindow(WindowSettings.Title, WindowSettings.Width, WindowSettings.Height, flags);
 		if(Window == null)

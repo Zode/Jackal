@@ -3,6 +3,10 @@ using SDL;
 using OpenTK.Graphics.OpenGL4;
 using Jackal.FileFormats;
 
+#if DEBUG
+using System.Runtime.InteropServices;
+#endif
+
 namespace Jackal.Rendering;
 
 /// <summary>
@@ -124,6 +128,12 @@ public unsafe static class Renderer
 			return;
 		}
 
+		#if DEBUG
+		GL.DebugMessageCallback(_GLDebugMessageDelegate, IntPtr.Zero);
+		GL.Enable(EnableCap.DebugOutput);
+		GL.Enable(EnableCap.DebugOutputSynchronous);
+		#endif
+
 		Texture.AddTextureLoader(".png", typeof(STBTextureLoader));
 		Texture.AddTextureLoader(".tga", typeof(STBTextureLoader));
 		Texture.AddTextureLoader(".bmp", typeof(STBTextureLoader));
@@ -168,6 +178,20 @@ public unsafe static class Renderer
 	{
 		GL.Viewport(0, 0, width, height);
 	}
+
+	#if DEBUG
+	private static DebugProc _GLDebugMessageDelegate = OnGLDebugMessage;
+	private static void OnGLDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr messagePtr, IntPtr userParamPtr)
+	{
+		string message = Marshal.PtrToStringAnsi(messagePtr, length);
+		message = $"GL DEBUG severity:{severity}\tsource:{source}\ttype:{type}\tid:{id}\n{message}";
+		Console.WriteLine(message);
+		if(type == DebugType.DebugTypeError)
+		{
+			throw new Exception(message);
+		}
+	}
+	#endif
 
 	/// <summary>
 	/// Called when the engine is shutting down, after any game code.
