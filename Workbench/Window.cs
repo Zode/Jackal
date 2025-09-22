@@ -137,7 +137,7 @@ public unsafe class Window : GameWindow
 
 	public override void OnRenderFrame()
 	{
-		texture.Bind();
+		texture.Bind(0);
 		shader.Bind();
 		color.X = MathF.Abs(MathF.Sin(Engine.TimeF));
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 1.22f));

@@ -19,6 +19,7 @@ public unsafe class Texture : IDisposable
 	private bool _disposed = false;
 	private int _ID = 0;
 	private static int _lastBoundID = 0;
+	private int _textureUnit = 0;
 	/// <summary>
 	/// Type of the texture.
 	/// </summary>
@@ -166,12 +167,12 @@ public unsafe class Texture : IDisposable
 		DataCheck3DArraysCubemap(filePaths.Length, textureSize.X * textureSize.Y, textureSize, textureSettings);
 
 		Texture texture = new(textureSize, textureSettings);
-		texture.SetupGLTexture();
+		texture.SetupGLTexture(textureSettings);
 		TextureFormat textureFormat = textureLoader.GetTextureFormat();
 		bool use16bit = textureLoader.Is16Bit();
 		SetUnpackAlignment(textureLoader.GetTextureFormat(), use16bit);
 		SizedInternalFormat sizedFormat = use16bit ? textureFormat.ToGL16BitInternal() : textureFormat.ToGL8BitInternal();
-		MultidimDataTexStorage(filePaths.Length, use16bit, textureSize, textureFormat, textureSettings);
+		texture.MultidimDataTextureStorage(filePaths.Length, use16bit, textureSize, textureFormat, textureSettings);
 		for(int i = 0; i < filePaths.Length; i++)
 		{
 			if(i != 0)
@@ -211,14 +212,14 @@ public unsafe class Texture : IDisposable
 			{
 				fixed(ushort* dataPtr = textureLoader.GetTextureData16())
 				{
-					MultidimDataTexSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, PixelType.UnsignedShort, textureSettings);
+					texture.MultidimDataTextureSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, PixelType.UnsignedShort, textureSettings);
 				}
 			}
 			else
 			{
 				fixed(byte* dataPtr = textureLoader.GetTextureData8())
 				{
-					MultidimDataTexSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, PixelType.UnsignedByte, textureSettings);
+					texture.MultidimDataTextureSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, PixelType.UnsignedByte, textureSettings);
 				}
 			}
 		}
@@ -263,47 +264,47 @@ public unsafe class Texture : IDisposable
 
 		DataCheck1D2D(data, textureSize, textureSettings);
 		Texture texture = new(textureSize, textureSettings);
-		texture.SetupGLTexture();
+		texture.SetupGLTexture(textureSettings);
 
 		SetUnpackAlignment(textureFormat, use16bit);
 		SizedInternalFormat sizedFormat = use16bit ? textureFormat.ToGL16BitInternal() : textureFormat.ToGL8BitInternal();
 		switch(textureSettings.TextureType)
 		{
 			case TextureType.OneDimensional:
-				GL.TexStorage1D(TextureTarget1d.Texture1D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X);
+				GL.TextureStorage1D(texture._ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X);
 				if(use16bit)
 				{
-					GL.TexSubImage1D(TextureTarget.Texture1D, 0, 0, textureSize.X, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
+					GL.TextureSubImage1D(texture._ID, 0, 0, textureSize.X, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
 				}
 				else
 				{
-					GL.TexSubImage1D(TextureTarget.Texture1D, 0, 0, textureSize.X, textureFormat.ToGLPixel(), pixelType, data as byte[]);
+					GL.TextureSubImage1D(texture._ID, 0, 0, textureSize.X, textureFormat.ToGLPixel(), pixelType, data as byte[]);
 				}
 
 				break;
 
 			case TextureType.TwoDimensional:
-				GL.TexStorage2D(TextureTarget2d.Texture2D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
+				GL.TextureStorage2D(texture._ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				if(use16bit)
 				{
-					GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
+					GL.TextureSubImage2D(texture._ID, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
 				}
 				else
 				{
-					GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as byte[]);
+					GL.TextureSubImage2D(texture._ID, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as byte[]);
 				}
 
 				break;
 
 			case TextureType.OneDimensionalArray:
-				GL.TexStorage2D(TextureTarget2d.Texture1DArray, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X, textureSize.Y);
+				GL.TextureStorage2D(texture._ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(textureSize.X)) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				if(use16bit)
 				{
-					GL.TexSubImage2D(TextureTarget.Texture1DArray, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
+					GL.TextureSubImage2D(texture._ID, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as ushort[]);
 				}
 				else
 				{
-					GL.TexSubImage2D(TextureTarget.Texture1DArray, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as byte[]);
+					GL.TextureSubImage2D(texture._ID, 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data as byte[]);
 				}
 
 				break;
@@ -349,10 +350,10 @@ public unsafe class Texture : IDisposable
 
 		DataCheck3DArraysCubemap(data.GetLength(0), data.GetLength(1), textureSize, textureSettings);
 		Texture texture = new(textureSize, textureSettings);
-		texture.SetupGLTexture();
+		texture.SetupGLTexture(textureSettings);
 
 		SetUnpackAlignment(textureFormat, use16bit);
-		MultidimDataTexStorage(data.GetLength(0), use16bit, textureSize, textureFormat, textureSettings);
+		texture.MultidimDataTextureStorage(data.GetLength(0), use16bit, textureSize, textureFormat, textureSettings);
 		for(int i = 0; i < data.GetLength(0); i++)
 		{
 			if(use16bit)
@@ -360,7 +361,7 @@ public unsafe class Texture : IDisposable
 				ushort[,] ushortData = data as ushort[,] ?? throw new TextureException("ushort data was null");
 				fixed(ushort* dataPtr = &ushortData[i,0])
 				{
-					MultidimDataTexSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, pixelType, textureSettings);
+					texture.MultidimDataTextureSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, pixelType, textureSettings);
 				}
 			}
 			else
@@ -368,7 +369,7 @@ public unsafe class Texture : IDisposable
 				byte[,] byteData = data as byte[,] ?? throw new TextureException("byte data was null");
 				fixed(byte* dataPtr = &byteData[i,0])
 				{
-					MultidimDataTexSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, pixelType, textureSettings);
+					texture.MultidimDataTextureSubImage((IntPtr)dataPtr, i, use16bit, textureSize, textureFormat, pixelType, textureSettings);
 				}
 			}
 		}
@@ -384,43 +385,43 @@ public unsafe class Texture : IDisposable
 		return texture;
 	}
 
-	private static void MultidimDataTexStorage(int depth, bool use16bit, Vector2i textureSize, TextureFormat textureFormat, TextureSettings textureSettings)
+	private void MultidimDataTextureStorage(int depth, bool use16bit, Vector2i textureSize, TextureFormat textureFormat, TextureSettings textureSettings)
 	{
 		SizedInternalFormat sizedFormat = use16bit ? textureFormat.ToGL16BitInternal() : textureFormat.ToGL8BitInternal();
 		switch(textureSettings.TextureType)
 		{
 			case TextureType.TwoDimensionalArray:
-				GL.TexStorage3D(TextureTarget3d.Texture2DArray, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
+				GL.TextureStorage3D(_ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
 				break;
 
 			case TextureType.ThreeDimensional:
-				GL.TexStorage3D(TextureTarget3d.Texture3D, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(MathF.Max(textureSize.X, textureSize.Y), depth))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
+				GL.TextureStorage3D(_ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(MathF.Max(textureSize.X, textureSize.Y), depth))) : 0, sizedFormat, textureSize.X, textureSize.Y, depth);
 				break;
 
 			case TextureType.CubeMap:
-				GL.TexStorage2D(TextureTarget2d.TextureCubeMap, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
+				GL.TextureStorage2D(_ID, textureSettings.Mipmaps ? 1 + (int)MathF.Floor(MathF.Log2(MathF.Max(textureSize.X, textureSize.Y))) : 0, sizedFormat, textureSize.X, textureSize.Y);
 				break;
 		}
 	}
 
-	private static void MultidimDataTexSubImage(IntPtr data, int depth,  bool use16bit, Vector2i textureSize, TextureFormat textureFormat, PixelType pixelType, TextureSettings textureSettings)
+	private void MultidimDataTextureSubImage(IntPtr data, int depth,  bool use16bit, Vector2i textureSize, TextureFormat textureFormat, PixelType pixelType, TextureSettings textureSettings)
 	{
 		switch(textureSettings.TextureType)
 		{
 			case TextureType.TwoDimensionalArray:
-				GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, depth, textureSize.X, textureSize.Y, 1, textureFormat.ToGLPixel(), pixelType, data);
+				GL.TextureSubImage3D(_ID, 0, 0, 0, depth, textureSize.X, textureSize.Y, 1, textureFormat.ToGLPixel(), pixelType, data);
 
 				break;
 
 			case TextureType.ThreeDimensional:
-				GL.TexSubImage3D(TextureTarget.Texture3D, 0, 0, 0, depth, textureSize.X, textureSize.Y, 1, textureFormat.ToGLPixel(), pixelType, data);
+				GL.TextureSubImage3D(_ID, 0, 0, 0, depth, textureSize.X, textureSize.Y, 1, textureFormat.ToGLPixel(), pixelType, data);
 
 				break;
 
 			case TextureType.CubeMap:
 				void PushToGL(CubemapDirection cubemapDirection)
 				{
-					GL.TexSubImage2D(cubemapDirection.ToGL(), 0, 0, 0, textureSize.X, textureSize.Y, textureFormat.ToGLPixel(), pixelType, data);
+					GL.TextureSubImage3D(_ID, 0, 0, 0, (int)cubemapDirection.ToGL(), textureSize.X, textureSize.Y, 1, textureFormat.ToGLPixel(), pixelType, data);
 				}
 
 				PushToGL((CubemapDirection)depth);
@@ -541,15 +542,13 @@ public unsafe class Texture : IDisposable
 		}
 	}
 
-	private void SetupGLTexture()
+	private void SetupGLTexture(TextureSettings textureSettings)
 	{
-		GL.GenTextures(1, out _ID);
+		GL.CreateTextures(textureSettings.TextureType.ToGLType(), 1, out _ID);
 		if(_ID == 0)
 		{
 			throw new TextureException("Could not create texture object on OpenGL side");
 		}
-
-		Bind();
 	}
 
 	private static void SetUnpackAlignment(TextureFormat textureFormat, bool is16bit)
@@ -585,28 +584,27 @@ public unsafe class Texture : IDisposable
 
 	private void SetFilters(bool mipmaps, TextureFilter filter)
 	{
-		Bind();
 		filter = filter != TextureFilter.None ? filter : Renderer.TextureFilter;
 		switch(filter)
 		{
 			case TextureFilter.NearestMipNearest:
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.NearestMipmapNearest : (int)TextureMinFilter.Nearest);
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.NearestMipmapNearest : (int)TextureMinFilter.Nearest);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 				break;
 
 			case TextureFilter.NearestMipLinear:
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.NearestMipmapLinear : (int)TextureMinFilter.Nearest);
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.NearestMipmapLinear : (int)TextureMinFilter.Nearest);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 				break;
 
 			case TextureFilter.LinearMipNear:
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.LinearMipmapNearest : (int)TextureMinFilter.Linear);
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.LinearMipmapNearest : (int)TextureMinFilter.Linear);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 				break;
 
 			case TextureFilter.LinearMipLinear:
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
-				GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMinFilter, mipmaps ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
+				GL.TextureParameter(_ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 				break;
 
 			default:
@@ -621,32 +619,30 @@ public unsafe class Texture : IDisposable
 
 	private void SetAnisotropy(TextureAnisotropy anisotropy)
 	{
-		Bind();
 		anisotropy = anisotropy != TextureAnisotropy.None ? anisotropy.Clamp(Renderer.MaximumTextureAnisotropy) : Renderer.TextureAnisotropy;
-		GL.TexParameter(TextureType.ToGLType(), TextureParameterName.TextureMaxAnisotropy, (float)anisotropy);
+		GL.TextureParameter(_ID, TextureParameterName.TextureMaxAnisotropy, (float)anisotropy);
 	}
 
 	private void SetWraps(TextureType textureType, TextureWrap textureWrap)
 	{
-		Bind();
 		switch(textureType)
 		{
 			case TextureType.OneDimensional:
 			case TextureType.OneDimensionalArray:
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
 				break;
 
 			case TextureType.TwoDimensional:
 			case TextureType.TwoDimensionalArray:
 			case TextureType.CubeMap:
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapT, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapT, (int)textureWrap.ToGL());
 				break;
 
 			case TextureType.ThreeDimensional:
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapT, (int)textureWrap.ToGL());
-				GL.TexParameter(textureType.ToGLType(), TextureParameterName.TextureWrapR, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapS, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapT, (int)textureWrap.ToGL());
+				GL.TextureParameter(_ID, TextureParameterName.TextureWrapR, (int)textureWrap.ToGL());
 				break;
 		}
 	}
@@ -658,14 +654,13 @@ public unsafe class Texture : IDisposable
 			return;
 		}
 
-		Bind();
-		GL.GenerateMipmap(textureType.ToGLMipmapType());
+		GL.GenerateTextureMipmap(_ID);
 	}
 
 	/// <summary>
 	/// Bind the vertex array as currently active.
 	/// </summary>
-	public void Bind()
+	public void Bind(int unit)
 	{
 		if(_lastBoundID == _ID || _ID == 0)
 		{
@@ -673,7 +668,8 @@ public unsafe class Texture : IDisposable
 		}
 
 		_lastBoundID = _ID;
-		GL.BindTexture(TextureType.ToGLType(), _ID);
+		_textureUnit = unit;
+		GL.BindTextureUnit(unit, _ID);
 	}
 
 	/// <summary>
@@ -681,11 +677,11 @@ public unsafe class Texture : IDisposable
 	/// </summary>
 	public void Unbind()
 	{
-		GL.BindTexture(TextureType.ToGLType(), 0);
+		GL.BindTextureUnit(_textureUnit, 0);
 	}
 
 	/// <summary>
-	/// Dispose the vertex array.
+	/// Dispose the texture.
 	/// </summary>
 	public void Dispose()
 	{
@@ -694,7 +690,7 @@ public unsafe class Texture : IDisposable
 	}
 
 	/// <summary>
-	/// Dispose the vertex array.
+	/// Dispose the texture.
 	/// </summary>
 	/// <param name="disposing"></param>
 	protected virtual void Dispose(bool disposing)
@@ -711,7 +707,7 @@ public unsafe class Texture : IDisposable
 	}
 
 	/// <summary>
-	/// Destructor for VertexArray class.
+	/// Destructor for Texture class.
 	/// </summary>
 	~Texture()
 	{
