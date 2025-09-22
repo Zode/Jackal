@@ -186,10 +186,6 @@ public unsafe static class Renderer
 		string message = Marshal.PtrToStringAnsi(messagePtr, length);
 		message = $"GL DEBUG severity:{severity}\tsource:{source}\ttype:{type}\tid:{id}\n{message}";
 		Console.WriteLine(message);
-		if(type == DebugType.DebugTypeError)
-		{
-			throw new Exception(message);
-		}
 	}
 	#endif
 
