@@ -81,6 +81,128 @@ public class VertexBuffer<T> : VertexBaseBuffer, IDisposable where T : struct
 			handle.Free();
 		}
 	}
+
+	/// <summary>
+	/// Initializes a new instance of VertexBuffer class.
+	/// </summary>
+	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
+	/// <exception cref="VertexBufferException"></exception>
+	/// <exception cref="NotImplementedException"></exception>
+	public VertexBuffer(T[] vertices, ushort[] indices)
+	{
+		if(vertices.Length == 0)
+		{
+			throw new VertexBufferException("No vertices");
+		}
+
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
+		}
+
+		GL.CreateBuffers(1, out _ID);
+		if(_ID == 0)
+		{
+			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+		}
+
+		_elementBufferType = ElementBufferType.UnsignedShort;
+		_indicesCount = indices.Length;
+
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(ushort));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(ushort);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+		_indicesOffset = verticesAligned;
+
+		_size = verticesAligned + indicesAligned;
+		GL.NamedBufferStorage(_ID, _size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+	}
+
+	/// <summary>
+	/// Initializes a new instance of VertexBuffer class.
+	/// </summary>
+	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
+	/// <exception cref="VertexBufferException"></exception>
+	/// <exception cref="NotImplementedException"></exception>
+	public VertexBuffer(T[] vertices, byte[] indices)
+	{
+		if(vertices.Length == 0)
+		{
+			throw new VertexBufferException("No vertices");
+		}
+
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
+		}
+
+		GL.CreateBuffers(1, out _ID);
+		if(_ID == 0)
+		{
+			throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+		}
+
+		_elementBufferType = ElementBufferType.UnsignedByte;
+		_indicesCount = indices.Length;
+
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(byte));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(byte);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+		_indicesOffset = verticesAligned;
+
+		_size = verticesAligned + indicesAligned;
+		GL.NamedBufferStorage(_ID, _size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+	}
 	
 	/// <summary>
 	/// Align operand to closest next alignment.
@@ -127,6 +249,164 @@ public class VertexBuffer<T> : VertexBaseBuffer, IDisposable where T : struct
 
 		int verticesSize = vertices.Length * sizeOfT;
 		int indicesSize = indices.Length * sizeof(uint);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+
+		int size = verticesAligned + indicesAligned;
+
+		if(size != _size)
+		{
+			Unbind();
+			GL.DeleteBuffers(1, ref _ID);
+			_ID = 0;
+			GL.CreateBuffers(1, out _ID);
+			if(_ID == 0)
+			{
+				throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+			}
+
+			GL.NamedBufferStorage(_ID, size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
+		}
+
+		_size = size;
+		_indicesCount = indices.Length;
+		_indicesOffset = verticesAligned;
+
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+	}
+
+	/// <summary>
+	/// Update the VertexBuffer contents. If buffer type or vertices size differs a new buffer is automatically allocated.
+	/// </summary>
+	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
+	/// <exception cref="VertexBufferException"></exception>
+	/// <exception cref="NotImplementedException"></exception>
+	public void Update(T[] vertices, ushort[] indices)
+	{
+		if(vertices.Length == 0)
+		{
+			throw new VertexBufferException("No vertices");
+		}
+
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
+		}
+		
+		if(_ID == 0)
+		{
+			throw new VertexBufferException("Can't update invalid buffer");
+		}
+
+		if(_elementBufferType != ElementBufferType.UnsignedShort)
+		{
+			throw new VertexBufferException($"Buffer type mismatch, element was unsigned short buffer had {_elementBufferType}");
+		}
+
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(ushort));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(ushort);
+
+		int verticesAligned = Align(verticesSize, closestAlignment);
+		int indicesAligned = Align(indicesSize, closestAlignment);
+
+		int size = verticesAligned + indicesAligned;
+
+		if(size != _size)
+		{
+			Unbind();
+			GL.DeleteBuffers(1, ref _ID);
+			_ID = 0;
+			GL.CreateBuffers(1, out _ID);
+			if(_ID == 0)
+			{
+				throw new VertexBufferException("Could not create vertex buffer object on OpenGL side");
+			}
+
+			GL.NamedBufferStorage(_ID, size, IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
+		}
+
+		_size = size;
+		_indicesCount = indices.Length;
+		_indicesOffset = verticesAligned;
+
+		GCHandle handle = GCHandle.Alloc(vertices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, 0, verticesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+
+		handle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+		try
+		{
+			GL.NamedBufferSubData(_ID, _indicesOffset, indicesSize, handle.AddrOfPinnedObject());
+		}
+		finally
+		{
+			handle.Free();
+		}
+	}
+
+	/// <summary>
+	/// Update the VertexBuffer contents. If buffer type or vertices size differs a new buffer is automatically allocated.
+	/// </summary>
+	/// <param name="vertices">Vertex array.</param>
+	/// <param name="indices">Indices.</param>
+	/// <exception cref="VertexBufferException"></exception>
+	/// <exception cref="NotImplementedException"></exception>
+	public void Update(T[] vertices, byte[] indices)
+	{
+		if(vertices.Length == 0)
+		{
+			throw new VertexBufferException("No vertices");
+		}
+
+		if(indices.Length == 0)
+		{
+			throw new VertexBufferException("No indices");
+		}
+		
+		if(_ID == 0)
+		{
+			throw new VertexBufferException("Can't update invalid buffer");
+		}
+
+		if(_elementBufferType != ElementBufferType.UnsignedByte)
+		{
+			throw new VertexBufferException($"Buffer type mismatch, element was unsigned byte buffer had {_elementBufferType}");
+		}
+
+		int sizeOfT = Marshal.SizeOf<T>();
+		int closestAlignment = Math.Max(sizeOfT, sizeof(byte));
+
+		int verticesSize = vertices.Length * sizeOfT;
+		int indicesSize = indices.Length * sizeof(byte);
 
 		int verticesAligned = Align(verticesSize, closestAlignment);
 		int indicesAligned = Align(indicesSize, closestAlignment);
