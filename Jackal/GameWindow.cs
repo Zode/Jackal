@@ -146,6 +146,7 @@ public unsafe class GameWindow() : IDisposable
 			Renderer.HandleFrameRateCap();
 		}
 
+		OnShutdown();
 		Engine.Shutdown();
 	}
 
@@ -210,6 +211,13 @@ public unsafe class GameWindow() : IDisposable
 	public virtual bool OnExitRequested()
 	{
 		return true;
+	}
+
+	/// <summary>
+	/// Called when the engine is shutting down.
+	/// </summary>
+	public virtual void OnShutdown()
+	{
 	}
 
 	/// <summary>

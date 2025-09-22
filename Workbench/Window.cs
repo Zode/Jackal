@@ -107,12 +107,16 @@ public unsafe class Window : GameWindow
 
 	public override bool OnExitRequested()
 	{
+		return true;
+	}
+
+	public override void OnShutdown()
+	{
 		texture.Dispose();
 		shader.Dispose();
 		vertArray.Dispose();
 		vertBuffer.Dispose();
 		elementBuffer.Dispose();
-		return true;
 	}
 
 	public override void OnMouseFocusChanged(bool mouseInWindow)
