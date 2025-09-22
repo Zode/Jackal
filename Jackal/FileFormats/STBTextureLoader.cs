@@ -25,6 +25,11 @@ public unsafe class STBTextureLoader : ITextureLoader
 	public void LoadFile(string filePath)
 	{
 		StbImage.stbi_set_flip_vertically_on_load(1);
+		if(_fileStream is not null)
+		{
+			_fileStream.Dispose();
+		}
+		
 		_fileStream = File.OpenRead(filePath);
 		if(_fileStream.Length == 0 || !_fileStream.CanRead)
 		{
@@ -132,8 +137,7 @@ public unsafe class STBTextureLoader : ITextureLoader
 		{
 			return;
 		}
-
-		_fileStream?.Close();
+		
 		_fileStream?.Dispose();
 		_disposed = true;
 	}
