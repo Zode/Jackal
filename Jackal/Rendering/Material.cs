@@ -1,8 +1,8 @@
 using System;
+using Jackal.Exceptions;
 
 #if DEBUG
 using System.Diagnostics;
-using Jackal.Exceptions;
 #endif
 
 namespace Jackal.Rendering;
