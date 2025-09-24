@@ -167,6 +167,7 @@ public class Shader : IDisposable
 	/// </summary>
 	/// <param name="name">Name of the variable.</param>
 	/// <returns>Location of the uniform variable.</returns>
+	// <exception cref="ShaderException"></exception>
 	public int GetUniformLocation(string name)
 	{
 		if(_uniformLocations.ContainsKey(name))
@@ -176,6 +177,11 @@ public class Shader : IDisposable
 
 		Bind();
 		int location = GL.GetUniformLocation(_ID, name);
+		if(location == -1)
+		{
+			throw new ShaderException($"No such uniform: {name}");
+		}
+
 		_uniformLocations[name] = location;
 		return location;
 	}

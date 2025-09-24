@@ -91,6 +91,14 @@ public unsafe static class Renderer
 	/// Uniform buffer offset alignment (GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT)
 	/// </summary>
 	public static int UniformBufferOffsetAlignment {get; private set;} = 0;
+	/// <summary>
+	/// Maximum fragment pass texture image units.
+	/// </summary>
+	public static int MaxTextureFragmentImageUnits {get; private set;} = 0;
+	/// <summary>
+	/// Maximum vertex pass texture image units.
+	/// </summary>
+	public static int MaxTextureVertexImageUnits {get; private set;} = 0;
 	
 	/// <summary>
 	/// </summary>
@@ -163,6 +171,11 @@ public unsafe static class Renderer
 
 		GL.GetInteger(GetPName.UniformBufferOffsetAlignment, &glint);
 		UniformBufferOffsetAlignment = glint;
+
+		GL.GetInteger(GetPName.MaxTextureImageUnits, &glint);
+		MaxTextureFragmentImageUnits = glint;
+		GL.GetInteger(GetPName.MaxVertexTextureImageUnits, &glint);
+		MaxTextureVertexImageUnits = glint;
 
 		GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		ResizeViewport(Engine.GameWindow.WindowSettings.Width, Engine.GameWindow.WindowSettings.Height);

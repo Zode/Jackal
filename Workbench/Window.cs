@@ -20,8 +20,7 @@ public class Window : GameWindow
 {
 	VertexArray vertArray;
 	VertexBuffer<Vertex> vertBuffer;
-	Texture texture;
-	Shader shader;
+	Material material;
 	Vector3 color = Vector3.One;
 
 	public Window()
@@ -50,7 +49,7 @@ public class Window : GameWindow
 		Renderer.TextureFilter = TextureFilter.LinearMipLinear;
 		Renderer.TextureAnisotropy = TextureAnisotropy.Sixteen;
 
-		shader = Shader.FromString("""
+		Shader shader = Shader.FromString("""
 		#version 460 core
 		layout (location = 0) in vec3 aPosition;
 		layout (location = 1) in vec2 aTexCoord;
@@ -76,6 +75,16 @@ public class Window : GameWindow
 		}
 		""");
 
+		Texture texture = Texture.FromFile("/home/zode/temp/test.png", new(){
+			TextureType = TextureType.TwoDimensional,
+			TextureWrap = TextureWrap.Repeat,
+			TextureFilterOverride = TextureFilter.None,
+			TextureAnisotropyOverride = TextureAnisotropy.None,
+			Mipmaps = true,
+		});
+
+		material = new(shader, [texture]);
+
 		Vertex[] vertices = [
 			new(-0.5f, 0.5f, 0.0f, 0.0f, 1.0f),
 			new(0.5f, 0.5f, 0.0f, 1.0f, 1.0f),
@@ -87,14 +96,6 @@ public class Window : GameWindow
 			0, 1, 3,
 			0, 2, 3,
 		];
-
-		texture = Texture.FromFile("/home/zode/temp/test.png", new(){
-			TextureType = TextureType.TwoDimensional,
-			TextureWrap = TextureWrap.Repeat,
-			TextureFilterOverride = TextureFilter.None,
-			TextureAnisotropyOverride = TextureAnisotropy.None,
-			Mipmaps = true,
-		});
 
 		vertBuffer = new(vertices, indices);
 		vertArray = new();
@@ -110,8 +111,7 @@ public class Window : GameWindow
 
 	public override void OnShutdown()
 	{
-		texture.Dispose();
-		shader.Dispose();
+		material.Dispose();
 		vertArray.Dispose();
 		vertBuffer.Dispose();
 	}
@@ -138,12 +138,10 @@ public class Window : GameWindow
 
 	public override void OnRenderFrame()
 	{
-		texture.Bind(0);
-		shader.Bind();
+		material.Bind();
 		color.X = MathF.Abs(MathF.Sin(Engine.TimeF));
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 1.22f));
 		color.Y = MathF.Abs(MathF.Sin(Engine.TimeF / 3.460f));
-		shader.SetUniform3(shader.GetUniformLocation("Color"), color);
 		vertArray.Bind();
 		vertArray.Draw(Jackal.Rendering.PrimitiveType.Triangles);
 
