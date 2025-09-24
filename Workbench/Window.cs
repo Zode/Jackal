@@ -69,9 +69,11 @@ public class Window : GameWindow
 
 		uniform sampler2D texture0;
 
+		uniform vec3 Color;
+
 		void main()
 		{
-			FragColor = texture(texture0, TexCoord);
+			FragColor = texture(texture0, TexCoord) * vec4(Color, 1.0f);
 		}
 		""");
 
@@ -83,7 +85,9 @@ public class Window : GameWindow
 			Mipmaps = true,
 		});
 
-		material = new(shader, [texture]);
+		material = new(shader, [texture], new(){
+			{"Color", new(){Type = MaterialUniformType.Vector3, Vector3 = new(1.0f, 0.0f, 0.0f)}},
+		});
 
 		Vertex[] vertices = [
 			new(-0.5f, 0.5f, 0.0f, 0.0f, 1.0f),
